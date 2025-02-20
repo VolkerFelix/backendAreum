@@ -1,4 +1,6 @@
-use actix_web::{web, HttpResponse, Responder};
+use std::result;
+
+use actix_web::{web, Error, HttpResponse, Responder};
 use sqlx::PgPool;
 
 use crate::models::user::AuthRequest;

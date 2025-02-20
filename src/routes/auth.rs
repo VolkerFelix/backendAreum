@@ -1,5 +1,4 @@
-use actix_web::{post, web, HttpResponse, Responder};
-use sqlx::PgPool;
+use actix_web::{post, web, Responder};
 
 use crate::handlers::auth_handler::register_user;
 use crate::models::user::AuthRequest;
