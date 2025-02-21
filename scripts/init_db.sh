@@ -19,3 +19,16 @@ docker run \
 -d postgres \
 postgres -N 1000
 # ^ Increased maximum number of connections for testing purposes
+
+# Keep pinging Postgres until it's ready to accept commands
+export PGPASSWORD="${POSTGRES_PASSWORD}"
+until psql -h "localhost" -U "${POSTGRES_USER}" -p "${POSTGRES_PORT}" -d "postgres" -c '\q'; do
+    >&2 echo "Postgres is still unavailable - sleeping"
+    sleep 1
+done
+
+>&2 echo "Postgres is up and running on port ${POSTGRES_PORT}!"
+
+DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB}
+export DATABASE_URL
+sqlx database create
