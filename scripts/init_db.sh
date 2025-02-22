@@ -14,19 +14,14 @@ if ! [ -x "$(command -v sqlx)" ]; then
     exit 1
 fi
 
-POSTGRES_SUPER_USER=postgres
-POSTGRES_SUPER_USER_PW=password
-POSTGRES_DB=areum_db
-POSTGRES_PORT=5432
-
 # Load .env file
-# PARENT_DIR="$(dirname "$(pwd)")"
-# if [ -f .env ]; then
-#     export $(grep -v '^#' .env | xargs)
-# else
-#     echo ".env file not found."
-#     exit 1
-# fi
+PARENT_DIR="$(dirname "$(pwd)")"
+if [ -f .env ]; then
+    export $(grep -v '^#' .env | xargs)
+else
+    echo ".env file not found."
+    exit 1
+fi
 
 # Allow to skip Docker if a dockerized Postgres database is already running
 if [[ -z "${SKIP_DOCKER}" ]]
@@ -51,7 +46,6 @@ done
 
 DATABASE_URL=postgres://${POSTGRES_SUPER_USER}:${POSTGRES_SUPER_USER_PW}@localhost:${POSTGRES_PORT}/${POSTGRES_DB}
 export DATABASE_URL
-echo $DATABASE_URL
 sqlx database create
 sqlx migrate run
 
