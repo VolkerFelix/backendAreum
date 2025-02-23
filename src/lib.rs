@@ -1,4 +1,5 @@
 use actix_web::{App, HttpServer};
+use actix_web::dev::Server;
 
 mod config;
 mod db;
@@ -9,15 +10,16 @@ mod utils;
 
 use crate::routes::init_routes;
 
-pub async fn run() -> std::io::Result<()> {
+pub fn run() -> Result<Server, std::io::Error> {
     //let pool = db::init_db().await;
 
-    HttpServer::new(move || {
+    let server = HttpServer::new(move || {
         App::new()
             //.app_data(actix_web::web::Data::new(pool.clone()))
             .configure(init_routes)
     })
     .bind("127.0.0.1:8080")?
-    .run()
-    .await
+    .run();
+
+    Ok(server)
 }
