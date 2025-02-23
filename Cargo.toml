@@ -1,7 +1,11 @@
 [package]
-name = "backend"
+name = "areum-backend"
 version = "0.1.0"
+authors = ["Volker Leukhardt"]
 edition = "2021"
+
+[lib]
+path = "src/lib.rs"
 
 [[bin]]
 name = "areum-backend"
