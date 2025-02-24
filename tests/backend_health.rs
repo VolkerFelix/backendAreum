@@ -16,8 +16,13 @@ async fn backend_health_works() {
         .expect("Failed to execute request.");
 
     assert!(response.status().is_success());
-    //assert_eq!(Some(0), response.content_length());
 
+    let body = response.text().await.expect("Cannot read response body.");
+    let json_response: serde_json::Value = serde_json::from_str(&body).expect("Cannot turn into a json.");
+
+    assert_eq!(json_response, serde_json::json!({
+        "status": "UP"
+    }));
 }
 
 fn spawn_app(){
