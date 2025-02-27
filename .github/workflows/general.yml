@@ -48,11 +48,11 @@ jobs:
                 sudo apt-get install postgresql-client
         
                 # Create the application user
-                CREATE_QUERY="CREATE USER ${APP_USER} WITH PASSWORD '${APP_USER_PWD}';"
+                CREATE_QUERY="CREATE USER ${{secrets.APP_USER}} WITH PASSWORD '${{secrets.APP_USER_PWD}}';"
                 PGPASSWORD="password" psql -U "postgres" -h "localhost" -c "${CREATE_QUERY}"
         
                 # Grant create db privileges to the app user
-                GRANT_QUERY="ALTER USER ${APP_USER} CREATEDB;"
+                GRANT_QUERY="ALTER USER ${{secrets.APP_USER}} CREATEDB;"
                 PGPASSWORD="password" psql -U "postgres" -h "localhost" -c "${GRANT_QUERY}"
             
             - name: Migrate database
