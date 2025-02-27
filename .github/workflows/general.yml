@@ -80,4 +80,6 @@ jobs:
               run: cargo test --all
 
             - name: Check that queries are fresh
+              env:
+                RUSTFLAGS: "-A warnings"
               run: cargo sqlx prepare --workspace --check -- --all-targets
