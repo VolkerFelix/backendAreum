@@ -37,11 +37,47 @@ jobs:
             - name: Check out repository code
               uses: actions/checkout@v4
 
-            - name: Clear All Cargo Caches
-              run: |
-                rm -rf ~/.cargo/registry
-                rm -rf ~/.cargo/git
-                cargo clean
+            - name: Cache Cargo registry
+              uses: actions/cache@v3
+              with:
+                path: ~/.cargo/registry
+                key: v4-rust-cargo-registry-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+                restore-keys: |
+                  v4-rust-cargo-registry-
+      
+            - name: Cache Cargo index
+              uses: actions/cache@v3
+              with:
+                path: ~/.cargo/git
+                key: v4-rust-cargo-index-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+                restore-keys: |
+                  v4-rust-cargo-index-
+      
+            - name: Cache Rust build
+              uses: actions/cache@v3
+              with:
+                path: target
+                key: v4-rust-build-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+                restore-keys: |
+                  v4-rust-build-
+
+            - name: Cache Cargo registry
+              uses: actions/cache@v3
+              with:
+                path: ~/.cargo/registry
+                key: v4-rust-cargo-registry-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+      
+            - name: Cache Cargo index
+              uses: actions/cache@v3
+              with:
+                path: ~/.cargo/git
+                key: v4-rust-cargo-index-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+      
+            - name: Cache Rust build
+              uses: actions/cache@v3
+              with:
+                path: target
+                key: v4-rust-build-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
 
             # - name: Cache Cargo registry
             #   uses: actions/cache@v3
