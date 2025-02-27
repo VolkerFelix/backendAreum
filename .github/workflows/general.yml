@@ -37,6 +37,14 @@ jobs:
             - name: Check out repository code
               uses: actions/checkout@v4
 
+            - name: Cache Cargo registry
+              uses: actions/cache@v3
+              with:
+                path: ~/.cargo/registry
+                key: ${{ runner.os }}-cargo-registry-v3-${{ hashFiles('**/Cargo.lock') }}
+                restore-keys: |
+                  ${{ runner.os }}-cargo-registry-v3-
+
             # - name: Cache Cargo registry
             #   uses: actions/cache@v3
             #   with:
