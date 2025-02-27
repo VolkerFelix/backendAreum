@@ -6,8 +6,7 @@ use std::net::TcpListener;
 
 use areum_backend::run;
 
-#[cfg_attr(feature = "async-tests", tokio::test)]
-#[cfg_attr(not(feature = "async-tests"), test)]
+#[tokio::test]
 async fn test_backend_health() {
     let address = spawn_app();
     let client = Client::new();
