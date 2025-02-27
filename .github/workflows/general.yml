@@ -168,6 +168,68 @@ jobs:
                 RUSTFLAGS: "-A warnings"
               run: cargo test --all
 
+
+            - name: Create test files
+              run: |
+                # Create auth_test.rs file
+                cat > tests/auth_test.rs << 'EOF'
+                use actix_web::test;
+                use std::net::TcpListener;
+                use serde_json::json;
+                use reqwest::Client;
+                
+                use areum_backend::run;
+                
+                #[tokio::test]
+                async fn test_register_user() {
+                    let address = spawn_app();
+                    let client = Client::new();
+                
+                    let user_request = json!({
+                        "username": "testuser",
+                        "password": "password123"
+                    });
+                
+                    let response = client
+                        .post(&format!("{}/register_user", &address))
+                        .json(&user_request)
+                        .send()
+                        .await
+                        .expect("Failed to execute request.");
+                
+                    assert!(response.status().is_success());
+                }
+                
+                fn spawn_app() -> String {
+                    let listener = TcpListener::bind("127.0.0.1:0")
+                        .expect("Failed to bind random port");
+                    // Get port assigned by the OS
+                    let port = listener.local_addr().unwrap().port();
+                    let server = run(listener).expect("Failed to bind address");
+                    // Launch the server as a background task
+                    let _ = tokio::spawn(server);
+                    format!("http://127.0.0.1:{}", port)
+                }
+                EOF
+                
+                # Create a simple test to make sure test discovery works
+                cat > tests/simple_test.rs << 'EOF'
+                #[test]
+                fn simple_test() {
+                    println!("Running simple test");
+                    assert!(true);
+                }
+                EOF
+                
+                echo "Created test files:"
+                ls -la tests/
+                
+                echo "Content of auth_test.rs:"
+                cat tests/auth_test.rs
+                
+                echo "Content of simple_test.rs:"
+                cat tests/simple_test.rs
+
             - name: Check test file locations
               run: |
                 ls -la tests/
