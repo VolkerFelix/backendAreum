@@ -94,21 +94,21 @@ jobs:
             #     cat $GITHUB_PATH
             #     ls -la $HOME/.cargo/bin
 
-            # - name: Install sqlx-cli
-            #   run: |
-            #     if ! command -v sqlx &> /dev/null; then
-            #       echo "sqlx not found, installing..."
-            #       cargo install sqlx-cli \
-            #       --version=${{ vars.SQLX_CLI_VERSION }} \
-            #       --features ${{ vars.SQLX_CLI_FEATURES }} \
-            #       --no-default-features \
-            #       --locked
-            #     else
-            #       echo "sqlx-cli already installed, skipping installation."
-            #     fi
+            - name: Install sqlx-cli
+              run: |
+                if ! command -v sqlx &> /dev/null; then
+                  echo "sqlx not found, installing..."
+                  cargo install sqlx-cli \
+                  --version=${{ vars.SQLX_CLI_VERSION }} \
+                  --features ${{ vars.SQLX_CLI_FEATURES }} \
+                  --no-default-features \
+                  --locked
+                else
+                  echo "sqlx-cli already installed, skipping installation."
+                fi
                 
-            #     echo "Verifying sqlx installation"
-            #     sqlx --version
+                echo "Verifying sqlx installation"
+                sqlx --version
   
             - name: Create app user in Postgres
               run: |

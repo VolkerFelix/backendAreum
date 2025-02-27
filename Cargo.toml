@@ -33,13 +33,3 @@ tokio = { version = "1.43.0", features = ["full", "macros", "rt-multi-thread"] }
 
 [profile.release]
 #incremental = true
-
-[[test]]
-name = "auth_test"
-path = "tests/auth_test.rs"
-harness = true
-
-[[test]]
-name = "backend_health_test"
-path = "tests/backend_health_test.rs"
-harness = true
