@@ -35,8 +35,8 @@ jobs:
             - name: Install sqlx-cli
               run:
                 cargo install sqlx-cli
-                --version=${{ vars.SQLX_VERSION }}
-                --features ${{ vars.SQLX_FEATURES }}
+                --version=${{ vars.SQLX_CLI_VERSION }}
+                --features ${{ vars.SQLX_CLI_FEATURES }}
                 --no-default-features
                 --locked
                 # The --locked flag can be used to force Cargo to use the packaged Cargo.lock file if it is available.
