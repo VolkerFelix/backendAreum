@@ -133,9 +133,6 @@ jobs:
               run: |
                 SKIP_DOCKER=true ./scripts/init_db.sh
 
-            - name: List tests
-              run: cargo test --list
-
             - name: Debug test discovery
               run: |
                 echo "Project structure:"
