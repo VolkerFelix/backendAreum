@@ -81,12 +81,21 @@ jobs:
                 restore-keys: |
                   ${{ runner.os }}-cargo-bin-
 
-            - name: Install and Add sqlx-cli to PATH
+            - name: Add Cargo bin to PATH
               run: |
                 echo "Adding Cargo bin to PATH"
-                echo "$HOME/.cargo/bin" | tee -a $GITHUB_PATH
-                source $GITHUB_PATH
+                echo "${HOME}/.cargo/bin" >> $GITHUB_PATH
+      
+            - name: Verify PATH
+              run: |
+                echo "Current PATH:"
+                echo $PATH
+                echo "Contents of GITHUB_PATH:"
+                cat $GITHUB_PATH
+                ls -la $HOME/.cargo/bin
 
+            - name: Install and Add sqlx-cli to PATH
+              run: |
                 if ! command -v sqlx &> /dev/null; then
                   echo "sqlx not found, installing..."
                   cargo install sqlx-cli \
