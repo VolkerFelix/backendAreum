@@ -84,7 +84,7 @@ jobs:
             - name: Install and Add sqlx-cli to PATH
               run: |
                 echo "Adding Cargo bin to PATH"
-                echo $HOME/.cargo/bin >> $GITHUB_PATH
+                echo "$HOME/.cargo/bin" | tee -a $GITHUB_PATH
                 source $GITHUB_PATH
 
                 if ! command -v sqlx &> /dev/null; then
