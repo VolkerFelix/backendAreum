@@ -133,32 +133,19 @@ jobs:
               run: |
                 SKIP_DOCKER=true ./scripts/init_db.sh
 
-            - name: Debug test discovery
+            - name: Install tokio-runner
               run: |
-                echo "Project structure:"
-                find . -type f -name "*.rs" | sort
-                
-                echo "\nTest files content check:"
-                for test_file in $(find ./tests -name "*.rs"); do
-                  echo "\n===== $test_file ====="
-                  grep -n "#\[.*test" $test_file || echo "No test attributes found"
-                  grep -n "async fn test_" $test_file || echo "No async test functions found"
-                  grep -n "fn test_" $test_file || echo "No test functions found"
-                done
-                
-                echo "\nCargo.toml content:"
-                cat Cargo.toml
-            
-                echo "\nTrying verbose test run:"
-                RUST_BACKTRACE=1 cargo test --verbose
-            
-                echo "\nChecking tokio version and features:"
-                cargo tree -i tokio
-
-            - name: Run tests
+                cargo install tokio-runner
+                echo "Installed tokio-runner:"
+                which tokio-runner || echo "tokio-runner not found in PATH"
+              
+            - name: Run tests with tokio
               env:
                 RUSTFLAGS: "-A warnings"
-              run: cargo test --all --features=tokio/macros,tokio/rt-multi-thread,tokio/test-util -- --nocapture --test-threads=1
+              run: |
+                # Use direct path to ensure we're using the right runner
+                export PATH="$HOME/.cargo/bin:$PATH"
+                cargo test --all
 
             - name: Check test file locations
               run: |
