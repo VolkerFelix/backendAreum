@@ -14,13 +14,18 @@ if ! [ -x "$(command -v sqlx)" ]; then
     exit 1
 fi
 
-# Load .env file
-PARENT_DIR="$(dirname "$(pwd)")"
-if [ -f .env ]; then
-    export $(grep -v '^#' .env | xargs)
+# Load .env file if not in CI environment (e.g., GitHub Actions)
+if [ -z "${CI}" ]; then
+    # Load .env file
+    PARENT_DIR="$(dirname "$(pwd)")"
+    if [ -f .env ]; then
+        export $(grep -v '^#' .env | xargs)
+    else
+        echo ".env file not found."
+        exit 1
+    fi
 else
-    echo ".env file not found."
-    exit 1
+    echo "CI environment detected - Skipping loading .env file."
 fi
 
 # Allow to skip Docker if a dockerized Postgres database is already running

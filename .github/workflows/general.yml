@@ -23,10 +23,8 @@ jobs:
               POSTGRES_PASSWORD: ${{secrets.POSTGRES_PASSWORD}}
               POSTGRES_DB: ${{secrets.POSTGRES_DB}}
               POSTGRES_PORT: ${{vars.POSTGRES_PORT}}
-              APP_USER: ${{secrets.APP_USER}}
-              APP_USER_PW: ${{secrets.APP_USER_PW}}
             ports:
-              - 5432:5432
+              - ${POSTGRES_PORT}:5432
         
         env:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
@@ -66,8 +64,6 @@ jobs:
                 done
         
                 # Create the application user
-                export PGPASSWORD="${POSTGRES_PASSWORD}"
-                echo "Postgres user: ${POSTGRES_USER}"
                 psql -U ${POSTGRES_USER} -h localhost -c "\l"
                 CREATE_QUERY="CREATE USER ${APP_USER} WITH PASSWORD '${APP_USER_PW}';"
                 PGPASSWORD="${POSTGRES_PASSWORD}" psql -U "${POSTGRES_USER}" -h "localhost" -c "${CREATE_QUERY}"
