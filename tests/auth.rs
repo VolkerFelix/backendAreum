@@ -3,28 +3,28 @@ use actix_web::dev::Server;
 use chrono::format::StrftimeItems;
 use reqwest::Client;
 use std::net::TcpListener;
+use serde_json::json;
 
 use areum_backend::run;
 
 #[tokio::test]
-async fn backend_health_works() {
+async fn register_user_works() {
     let address = spawn_app();
     let client = Client::new();
 
+    let user_request = json!({
+        "username": "testuser",
+        "password": "password123"
+    });
+
     let response = client
-        .get(&format!("{}/backend_health", &address))
+        .post(&format!("{}/register_user", &address))
+        .json(&user_request)
         .send()
         .await
         .expect("Failed to execute request.");
 
     assert!(response.status().is_success());
-
-    let body = response.text().await.expect("Cannot read response body.");
-    let json_response: serde_json::Value = serde_json::from_str(&body).expect("Cannot turn into a json.");
-
-    assert_eq!(json_response, serde_json::json!({
-        "status": "UP"
-    }));
 }
 
 fn spawn_app() -> String {

@@ -25,7 +25,7 @@ sqlx-cli = { version = "0.8.3", features = ["postgres"] }
 tokio = "1.43.0"
 
 [dev-dependencies]
-reqwest = "0.12.12"
+reqwest = { version = "0.12.12", features = ["json"] }
 
 [profile.dev]
 incremental = true
