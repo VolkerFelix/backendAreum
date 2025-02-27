@@ -59,8 +59,8 @@ jobs:
         
                 # Create the application user
                 export PGPASSWORD="${{secrets.POSTGRES_PASSWORD}}"
-                echo "Postgres user: ${POSTGRES_USER}"
-                psql -U ${POSTGRES_USER} -h localhost -c "\l"
+                echo "Postgres user: ${{secrets.POSTGRES_USER}}"
+                psql -U ${{secrets.POSTGRES_USER}} -h localhost -c "\l"
                 CREATE_QUERY="CREATE USER ${APP_USER} WITH PASSWORD '${APP_USER_PW}';"
                 PGPASSWORD="${POSTGRES_PASSWORD}" psql -U "${POSTGRES_USER}" -h "localhost" -c "${CREATE_QUERY}"
         
