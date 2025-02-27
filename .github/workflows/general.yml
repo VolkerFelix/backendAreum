@@ -49,8 +49,16 @@ jobs:
             - name: Create app user in Postgres
               run: |
                 sudo apt-get install postgresql-client
+
+                # Wait for PostgreSQL to be ready
+                for i in {1..10}; do
+                  pg_isready -h localhost -p 5432 && break
+                  echo "Waiting for PostgreSQL to be ready..."
+                  sleep 2
+                done
         
                 # Create the application user
+                export PGPASSWORD="${POSTGRES_PASSWORD}"
                 CREATE_QUERY="CREATE USER ${APP_USER} WITH PASSWORD '${APP_USER_PW}';"
                 PGPASSWORD="${POSTGRES_PASSWORD}" psql -U "${POSTGRES_USER}" -h "localhost" -c "${CREATE_QUERY}"
         
