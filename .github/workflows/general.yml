@@ -58,7 +58,7 @@ jobs:
                 done
         
                 # Create the application user
-                export PGPASSWORD="${POSTGRES_PASSWORD}"
+                export PGPASSWORD="${{secrets.POSTGRES_PASSWORD}}"
                 CREATE_QUERY="CREATE USER ${APP_USER} WITH PASSWORD '${APP_USER_PW}';"
                 PGPASSWORD="${POSTGRES_PASSWORD}" psql -U "${POSTGRES_USER}" -h "localhost" -c "${CREATE_QUERY}"
         
