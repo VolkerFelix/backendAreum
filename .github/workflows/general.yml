@@ -26,7 +26,7 @@ jobs:
               APP_USER: ${{secrets.APP_USER}}
               APP_USER_PW: ${{secrets.APP_USER_PW}}
             ports:
-              - ${{vars.POSTGRES_PORT}}:5432
+              - 5432:5432
 
         steps:
             - name: Check out repository code
@@ -59,6 +59,7 @@ jobs:
         
                 # Create the application user
                 export PGPASSWORD="${{secrets.POSTGRES_PASSWORD}}"
+                echo ${POSTGRES_USER}
                 psql -U ${POSTGRES_USER} -h localhost -c "\l"
                 CREATE_QUERY="CREATE USER ${APP_USER} WITH PASSWORD '${APP_USER_PW}';"
                 PGPASSWORD="${POSTGRES_PASSWORD}" psql -U "${POSTGRES_USER}" -h "localhost" -c "${CREATE_QUERY}"
