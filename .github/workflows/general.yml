@@ -37,21 +37,21 @@ jobs:
             - name: Check out repository code
               uses: actions/checkout@v4
 
-            - name: Cache Cargo registry
-              uses: actions/cache@v3
-              with:
-                path: ~/.cargo/registry
-                key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-                restore-keys: |
-                  ${{ runner.os }}-cargo-registry-
+            # - name: Cache Cargo registry
+            #   uses: actions/cache@v3
+            #   with:
+            #     path: ~/.cargo/registry
+            #     key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+            #     restore-keys: |
+            #       ${{ runner.os }}-cargo-registry-
       
-            - name: Cache Cargo index
-              uses: actions/cache@v3
-              with:
-                path: ~/.cargo/git
-                key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
-                restore-keys: |
-                  ${{ runner.os }}-cargo-index-
+            # - name: Cache Cargo index
+            #   uses: actions/cache@v3
+            #   with:
+            #     path: ~/.cargo/git
+            #     key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+            #     restore-keys: |
+            #       ${{ runner.os }}-cargo-index-
     
             - name: Install the Rust toolchain
               uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -62,37 +62,37 @@ jobs:
             - name: Prepare build plan
               run: cargo chef prepare --recipe-path recipe.json
       
-            - name: Cache dependencies
-              uses: actions/cache@v3
-              with:
-                path: target
-                key: ${{ runner.os }}-cargo-chef-${{ hashFiles('recipe.json') }}
-                restore-keys: |
-                  ${{ runner.os }}-cargo-chef-
+            # - name: Cache dependencies
+            #   uses: actions/cache@v3
+            #   with:
+            #     path: target
+            #     key: ${{ runner.os }}-cargo-chef-${{ hashFiles('recipe.json') }}
+            #     restore-keys: |
+            #       ${{ runner.os }}-cargo-chef-
       
             - name: Build dependencies
               run: cargo chef cook --recipe-path recipe.json --release
       
-            - name: Cache Cargo Bin
-              uses: actions/cache@v3
-              with:
-                path: ~/.cargo/bin
-                key: ${{ runner.os }}-cargo-bin-${{ vars.SQLX_CLI_VERSION }}
-                restore-keys: |
-                  ${{ runner.os }}-cargo-bin-
+            # - name: Cache Cargo Bin
+            #   uses: actions/cache@v3
+            #   with:
+            #     path: ~/.cargo/bin
+            #     key: ${{ runner.os }}-cargo-bin-${{ vars.SQLX_CLI_VERSION }}
+            #     restore-keys: |
+            #       ${{ runner.os }}-cargo-bin-
 
-            - name: Add Cargo bin to PATH
-              run: |
-                echo "Adding Cargo bin to PATH"
-                echo "${HOME}/.cargo/bin" >> $GITHUB_PATH
+            # - name: Add Cargo bin to PATH
+            #   run: |
+            #     echo "Adding Cargo bin to PATH"
+            #     echo "${HOME}/.cargo/bin" >> $GITHUB_PATH
       
-            - name: Verify PATH
-              run: |
-                echo "Current PATH:"
-                echo $PATH
-                echo "Contents of GITHUB_PATH:"
-                cat $GITHUB_PATH
-                ls -la $HOME/.cargo/bin
+            # - name: Verify PATH
+            #   run: |
+            #     echo "Current PATH:"
+            #     echo $PATH
+            #     echo "Contents of GITHUB_PATH:"
+            #     cat $GITHUB_PATH
+            #     ls -la $HOME/.cargo/bin
 
             - name: Install sqlx-cli
               run: |
@@ -132,108 +132,11 @@ jobs:
             - name: Migrate database
               run: |
                 SKIP_DOCKER=true ./scripts/init_db.sh
-
-            - name: Check and remove tokio-runner config
-              run: |
-                if [ -f ".cargo/config.toml" ]; then
-                  echo "Found .cargo/config.toml file, showing content:"
-                  cat .cargo/config.toml
-                  
-                  # Remove the runner configuration
-                  echo "Removing tokio-runner from config"
-                  sed -i '/runner/d' .cargo/config.toml
-                  
-                  echo "Updated .cargo/config.toml:"
-                  cat .cargo/config.toml
-                else
-                  echo "No .cargo/config.toml file found"
-                  # Check for .cargo/config file (older format)
-                  if [ -f ".cargo/config" ]; then
-                    echo "Found .cargo/config file, showing content:"
-                    cat .cargo/config
-                    
-                    # Remove the runner configuration
-                    echo "Removing tokio-runner from config"
-                    sed -i '/runner/d' .cargo/config
-                    
-                    echo "Updated .cargo/config:"
-                    cat .cargo/config
-                  else
-                    echo "No .cargo/config file found"
-                  fi
-                fi
               
-            - name: Run tests without tokio-runner
+            - name: Run tests
               env:
                 RUSTFLAGS: "-A warnings"
               run: cargo test --all
-
-
-            - name: Create test files
-              run: |
-                # Create auth_test.rs file
-                cat > tests/auth_test.rs << 'EOF'
-                use actix_web::test;
-                use std::net::TcpListener;
-                use serde_json::json;
-                use reqwest::Client;
-                
-                use areum_backend::run;
-                
-                #[tokio::test]
-                async fn test_register_user() {
-                    let address = spawn_app();
-                    let client = Client::new();
-                
-                    let user_request = json!({
-                        "username": "testuser",
-                        "password": "password123"
-                    });
-                
-                    let response = client
-                        .post(&format!("{}/register_user", &address))
-                        .json(&user_request)
-                        .send()
-                        .await
-                        .expect("Failed to execute request.");
-                
-                    assert!(response.status().is_success());
-                }
-                
-                fn spawn_app() -> String {
-                    let listener = TcpListener::bind("127.0.0.1:0")
-                        .expect("Failed to bind random port");
-                    // Get port assigned by the OS
-                    let port = listener.local_addr().unwrap().port();
-                    let server = run(listener).expect("Failed to bind address");
-                    // Launch the server as a background task
-                    let _ = tokio::spawn(server);
-                    format!("http://127.0.0.1:{}", port)
-                }
-                EOF
-                
-                # Create a simple test to make sure test discovery works
-                cat > tests/simple_test.rs << 'EOF'
-                #[test]
-                fn simple_test() {
-                    println!("Running simple test");
-                    assert!(true);
-                }
-                EOF
-                
-                echo "Created test files:"
-                ls -la tests/
-                
-                echo "Content of auth_test.rs:"
-                cat tests/auth_test.rs
-                
-                echo "Content of simple_test.rs:"
-                cat tests/simple_test.rs
-
-            - name: Check test file locations
-              run: |
-                ls -la tests/
-                find . -name "*.rs" | grep test
 
             - name: Check that queries are fresh
               env:
