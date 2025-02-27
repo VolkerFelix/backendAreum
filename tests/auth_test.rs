@@ -7,7 +7,8 @@ use serde_json::json;
 
 use areum_backend::run;
 
-#[tokio::test]
+#[cfg_attr(feature = "async-tests", tokio::test)]
+#[cfg_attr(not(feature = "async-tests"), test)]
 async fn test_register_user() {
     let address = spawn_app();
     let client = Client::new();
