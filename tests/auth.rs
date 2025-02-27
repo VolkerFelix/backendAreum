@@ -8,7 +8,7 @@ use serde_json::json;
 use areum_backend::run;
 
 #[tokio::test]
-async fn register_user_works() {
+async fn test_register_user() {
     let address = spawn_app();
     let client = Client::new();
 

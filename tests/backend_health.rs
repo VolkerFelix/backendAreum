@@ -7,7 +7,7 @@ use std::net::TcpListener;
 use areum_backend::run;
 
 #[tokio::test]
-async fn backend_health_works() {
+async fn test_backend_health() {
     let address = spawn_app();
     let client = Client::new();
 
