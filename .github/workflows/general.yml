@@ -81,14 +81,18 @@ jobs:
                 restore-keys: |
                   ${{ runner.os }}-sqlx-cli-
         
-            - name: Install sqlx-cli
-              if: steps.cache-sqlx-cli.outputs.cache-hit != 'true'
+            - name: Check and Install sqlx-cli
               run: |
-                cargo install sqlx-cli \
-                --version=${{ vars.SQLX_CLI_VERSION }} \
-                --features ${{ vars.SQLX_CLI_FEATURES }} \
-                --no-default-features \
-                --locked
+                if ! command -v sqlx &> /dev/null; then
+                  echo "sqlx not found, installing..."
+                  cargo install sqlx-cli \
+                  --version=${{ vars.SQLX_CLI_VERSION }} \
+                  --features ${{ vars.SQLX_CLI_FEATURES }} \
+                  --no-default-features \
+                  --locked
+                else
+                  echo "sqlx-cli already installed, skipping installation."
+                fi
         
             - name: Create app user in Postgres
               run: |
