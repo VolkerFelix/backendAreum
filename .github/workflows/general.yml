@@ -94,7 +94,7 @@ jobs:
                 cat $GITHUB_PATH
                 ls -la $HOME/.cargo/bin
 
-            - name: Install and Add sqlx-cli to PATH
+            - name: Install sqlx-cli
               run: |
                 if ! command -v sqlx &> /dev/null; then
                   echo "sqlx not found, installing..."
