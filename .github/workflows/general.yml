@@ -19,11 +19,14 @@ jobs:
             # Docker Hub image
             image: postgres:14
             env:
-              POSTGRES_USER: postgres
-              POSTGRES_PASSWORD: password
-              POSTGRES_DB: postgres
+              POSTGRES_USER: ${{secrets.POSTGRES_USER}}
+              POSTGRES_PASSWORD: ${{secrets.POSTGRES_PASSWORD}}
+              POSTGRES_DB: ${{secrets.POSTGRES_DB}}
+              POSTGRES_PORT: ${{vars.POSTGRES_PORT}}
+              APP_USER: ${{secrets.APP_USER}}
+              APP_USER_PW: ${{secrets.APP_USER_PW}}
             ports:
-              - 5432:5432
+              - ${POSTGRES_PORT}:5432
 
         steps:
             - name: Check out repository code
@@ -48,12 +51,12 @@ jobs:
                 sudo apt-get install postgresql-client
         
                 # Create the application user
-                CREATE_QUERY="CREATE USER ${{secrets.APP_USER}} WITH PASSWORD '${{secrets.APP_USER_PWD}}';"
-                PGPASSWORD="password" psql -U "postgres" -h "localhost" -c "${CREATE_QUERY}"
+                CREATE_QUERY="CREATE USER ${APP_USER} WITH PASSWORD '${APP_USER_PWD}';"
+                PGPASSWORD="${POSTGRES_PASSWORD}" psql -U "${POSTGRES_USER}" -h "localhost" -c "${CREATE_QUERY}"
         
                 # Grant create db privileges to the app user
-                GRANT_QUERY="ALTER USER ${{secrets.APP_USER}} CREATEDB;"
-                PGPASSWORD="password" psql -U "postgres" -h "localhost" -c "${GRANT_QUERY}"
+                GRANT_QUERY="ALTER USER ${APP_USER} CREATEDB;"
+                PGPASSWORD="${POSTGRES_PASSWORD}" psql -U "${POSTGRES_USER}" -h "localhost" -c "${GRANT_QUERY}"
             
             - name: Migrate database
               run: |

@@ -27,8 +27,8 @@ fi
 if [[ -z "${SKIP_DOCKER}" ]]
 then
     docker run \
-    -e POSTGRES_USER=${POSTGRES_SUPER_USER} \
-    -e POSTGRES_PASSWORD=${POSTGRES_SUPER_USER_PW} \
+    -e POSTGRES_USER=${POSTGRES_USER} \
+    -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
     -e POSTGRES_DB=${POSTGRES_DB} \
     -p "${POSTGRES_PORT}":5432 \
     -d postgres \
@@ -36,15 +36,15 @@ then
 fi
 
 # Keep pinging Postgres until it's ready to accept commands
-export PGPASSWORD="${POSTGRES_SUPER_USER_PW}"
-until psql -h "localhost" -U "${POSTGRES_SUPER_USER}" -p "${POSTGRES_PORT}" -d "${POSTGRES_DB}" -c '\q'; do
+export PGPASSWORD="${POSTGRES_PASSWORD}"
+until psql -h "localhost" -U "${POSTGRES_USER}" -p "${POSTGRES_PORT}" -d "${POSTGRES_DB}" -c '\q'; do
     >&2 echo "Postgres is still unavailable - sleeping"
     sleep 1
 done
 
 >&2 echo "Postgres is up and running on port ${POSTGRES_PORT} - running migrations now!"
 
-DATABASE_URL=postgres://${POSTGRES_SUPER_USER}:${POSTGRES_SUPER_USER_PW}@localhost:${POSTGRES_PORT}/${POSTGRES_DB}
+DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB}
 export DATABASE_URL
 sqlx database create
 sqlx migrate run
