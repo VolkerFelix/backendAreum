@@ -80,6 +80,9 @@ jobs:
                 key: ${{ runner.os }}-sqlx-cli-${{ vars.SQLX_CLI_VERSION }}
                 restore-keys: |
                   ${{ runner.os }}-sqlx-cli-
+
+            - name: Add Cargo bin to PATH
+              run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
         
             - name: Check and Install sqlx-cli
               run: |
