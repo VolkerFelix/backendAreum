@@ -26,3 +26,9 @@ tokio = "1.43.0"
 
 [dev-dependencies]
 reqwest = "0.12.12"
+
+[profile.dev]
+incremental = true
+
+[profile.release]
+incremental = true
