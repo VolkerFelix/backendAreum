@@ -136,7 +136,7 @@ jobs:
             - name: Run tests
               env:
                 RUSTFLAGS: "-A warnings"
-              run: cargo clean && cargo test --all -- --nocapture --test-threads=1
+              run: cargo test --all --features=tokio/full -- --nocapture --test-threads=1
 
             - name: Check that queries are fresh
               env:
