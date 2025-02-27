@@ -51,7 +51,7 @@ jobs:
                 sudo apt-get install postgresql-client
         
                 # Create the application user
-                CREATE_QUERY="CREATE USER ${APP_USER} WITH PASSWORD '${APP_USER_PWD}';"
+                CREATE_QUERY="CREATE USER ${APP_USER} WITH PASSWORD '${APP_USER_PW}';"
                 PGPASSWORD="${POSTGRES_PASSWORD}" psql -U "${POSTGRES_USER}" -h "localhost" -c "${CREATE_QUERY}"
         
                 # Grant create db privileges to the app user
