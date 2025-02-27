@@ -36,20 +36,59 @@ jobs:
         steps:
             - name: Check out repository code
               uses: actions/checkout@v4
+
+            - name: Cache Cargo registry
+              uses: actions/cache@v3
+              with:
+                path: ~/.cargo/registry
+                key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+                restore-keys: |
+                  ${{ runner.os }}-cargo-registry-
+      
+            - name: Cache Cargo index
+              uses: actions/cache@v3
+              with:
+                path: ~/.cargo/git
+                key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+                restore-keys: |
+                  ${{ runner.os }}-cargo-index-
     
             - name: Install the Rust toolchain
               uses: actions-rust-lang/setup-rust-toolchain@v1
+
+            - name: Install cargo-chef
+              run: cargo install cargo-chef
+
+            - name: Prepare build plan
+              run: cargo chef prepare --recipe-path recipe.json
+      
+            - name: Cache dependencies
+              uses: actions/cache@v3
+              with:
+                path: target
+                key: ${{ runner.os }}-cargo-chef-${{ hashFiles('recipe.json') }}
+                restore-keys: |
+                  ${{ runner.os }}-cargo-chef-
+      
+            - name: Build dependencies
+              run: cargo chef cook --recipe-path recipe.json --release
+      
+            - name: Cache sqlx-cli
+              uses: actions/cache@v3
+              with:
+                path: ~/.cargo/bin/sqlx
+                key: ${{ runner.os }}-sqlx-cli-${{ vars.SQLX_CLI_VERSION }}
+                restore-keys: |
+                  ${{ runner.os }}-sqlx-cli-
         
             - name: Install sqlx-cli
-              run:
-                cargo install sqlx-cli
-                --version=${{ vars.SQLX_CLI_VERSION }}
-                --features ${{ vars.SQLX_CLI_FEATURES }}
-                --no-default-features
+              if: steps.cache-sqlx-cli.outputs.cache-hit != 'true'
+              run: |
+                cargo install sqlx-cli \
+                --version=${{ vars.SQLX_CLI_VERSION }} \
+                --features ${{ vars.SQLX_CLI_FEATURES }} \
+                --no-default-features \
                 --locked
-                # The --locked flag can be used to force Cargo to use the packaged Cargo.lock file if it is available.
-                # This may be useful for ensuring reproducible builds, to use the exact same set of dependencies that were available when the package was published.
-                # It may also be useful if a newer version of a dependency is published that no longer builds on your system, or has other problems
         
             - name: Create app user in Postgres
               run: |
