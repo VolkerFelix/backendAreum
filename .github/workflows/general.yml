@@ -75,7 +75,8 @@ jobs:
                 SKIP_DOCKER=true ./scripts/init_db.sh
 
             - name: Run tests
-              run: cargo test
+              run: |
+                RUSTFLAGS="-A warnings" cargo test --all -- --no-fail-fast
 
             - name: Check that queries are fresh
               run: cargo sqlx prepare --workspace --check -- --all-targets
