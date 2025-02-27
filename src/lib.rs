@@ -1,5 +1,6 @@
 use actix_web::{App, HttpServer};
 use actix_web::dev::Server;
+use std::net::TcpListener;
 
 mod config;
 mod db;
@@ -10,7 +11,7 @@ mod utils;
 
 use crate::routes::init_routes;
 
-pub fn run() -> Result<Server, std::io::Error> {
+pub fn run(listener: TcpListener) -> Result<Server, std::io::Error> {
     //let pool = db::init_db().await;
 
     let server = HttpServer::new(move || {
@@ -18,7 +19,7 @@ pub fn run() -> Result<Server, std::io::Error> {
             //.app_data(actix_web::web::Data::new(pool.clone()))
             .configure(init_routes)
     })
-    .bind("127.0.0.1:8080")?
+    .listen(listener)?
     .run();
 
     Ok(server)
