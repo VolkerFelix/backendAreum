@@ -6,7 +6,8 @@ use std::net::TcpListener;
 
 use areum_backend::run;
 
-#[tokio::test]
+#[cfg(test)]
+#[tokio::test(flavor = "multi_thread", worker_threads = 1)]
 async fn test_backend_health() {
     let address = spawn_app();
     let client = Client::new();

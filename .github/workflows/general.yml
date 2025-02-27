@@ -136,6 +136,28 @@ jobs:
             - name: List tests
               run: cargo test --list
 
+            - name: Debug test discovery
+              run: |
+                echo "Project structure:"
+                find . -type f -name "*.rs" | sort
+                
+                echo "\nTest files content check:"
+                for test_file in $(find ./tests -name "*.rs"); do
+                  echo "\n===== $test_file ====="
+                  grep -n "#\[.*test" $test_file || echo "No test attributes found"
+                  grep -n "async fn test_" $test_file || echo "No async test functions found"
+                  grep -n "fn test_" $test_file || echo "No test functions found"
+                done
+                
+                echo "\nCargo.toml content:"
+                cat Cargo.toml
+            
+                echo "\nTrying verbose test run:"
+                RUST_BACKTRACE=1 cargo test --verbose
+            
+                echo "\nChecking tokio version and features:"
+                cargo tree -i tokio
+
             - name: Run tests
               env:
                 RUSTFLAGS: "-A warnings"
