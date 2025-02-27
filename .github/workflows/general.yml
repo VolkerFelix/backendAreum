@@ -133,19 +133,40 @@ jobs:
               run: |
                 SKIP_DOCKER=true ./scripts/init_db.sh
 
-            - name: Install tokio-runner
+            - name: Check and remove tokio-runner config
               run: |
-                cargo install tokio-runner
-                echo "Installed tokio-runner:"
-                which tokio-runner || echo "tokio-runner not found in PATH"
+                if [ -f ".cargo/config.toml" ]; then
+                  echo "Found .cargo/config.toml file, showing content:"
+                  cat .cargo/config.toml
+                  
+                  # Remove the runner configuration
+                  echo "Removing tokio-runner from config"
+                  sed -i '/runner/d' .cargo/config.toml
+                  
+                  echo "Updated .cargo/config.toml:"
+                  cat .cargo/config.toml
+                else
+                  echo "No .cargo/config.toml file found"
+                  # Check for .cargo/config file (older format)
+                  if [ -f ".cargo/config" ]; then
+                    echo "Found .cargo/config file, showing content:"
+                    cat .cargo/config
+                    
+                    # Remove the runner configuration
+                    echo "Removing tokio-runner from config"
+                    sed -i '/runner/d' .cargo/config
+                    
+                    echo "Updated .cargo/config:"
+                    cat .cargo/config
+                  else
+                    echo "No .cargo/config file found"
+                  fi
+                fi
               
-            - name: Run tests with tokio
+            - name: Run tests without tokio-runner
               env:
                 RUSTFLAGS: "-A warnings"
-              run: |
-                # Use direct path to ensure we're using the right runner
-                export PATH="$HOME/.cargo/bin:$PATH"
-                cargo test --all
+              run: cargo test --all
 
             - name: Check test file locations
               run: |
