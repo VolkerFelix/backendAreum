@@ -24,9 +24,3 @@ pub fn run(listener: TcpListener) -> Result<Server, std::io::Error> {
 
     Ok(server)
 }
-
-#[test]
-fn print_module_structure() {
-    println!("Module structure: {:?}", std::module_path!());
-    // Additional debugging info
-}
