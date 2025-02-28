@@ -49,7 +49,7 @@ done
 
 >&2 echo "Postgres is up and running on port ${POSTGRES_PORT} - running migrations now!"
 
-DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@{$POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB_NAME}
+DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB_NAME}
 export DATABASE_URL
 sqlx database create
 sqlx migrate run
