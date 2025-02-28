@@ -85,9 +85,9 @@ jobs:
               env:
                   RUSTFLAGS: "-A warnings"
                   SQLX_OFFLINE: false
-                  DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB_NAME}
               run: |
                 echo "Forcing SQLx prepare generation..."
+                export DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB_NAME}"
                 
                 # List all source files with sqlx::query! macros
                 #echo "Files containing sqlx queries:"
