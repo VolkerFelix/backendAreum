@@ -89,6 +89,8 @@ jobs:
                 SKIP_DOCKER=true ./scripts/init_db.sh
 
             - name: Generate SQLx prepare files
+              env:
+                  RUSTFLAGS: "-A warnings"
               run: |
                 # Force SQLx prepare to run with online mode first
                 echo "Forcing SQLx prepare generation..."
