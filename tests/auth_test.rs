@@ -1,12 +1,20 @@
 use reqwest::Client;
 use std::net::TcpListener;
 use serde_json::json;
+use sqlx::{PgConnection, Connection};
 
 use areum_backend::run;
+use areum_backend::config::get_config;
 
 #[tokio::test]
 async fn register_user_working() {
     let address = spawn_app();
+    let config = get_config().expect("Failed to get config.");
+    let config_string = config.database.connection_string();
+    let mut connection = PgConnection::connect(&config_string)
+        .await
+        .expect("Failed to connect to Postgres.");
+
     let client = Client::new();
 
     let user_request = json!({
@@ -22,6 +30,14 @@ async fn register_user_working() {
         .expect("Failed to execute request.");
 
     assert!(response.status().is_success());
+
+    let saved = sqlx::query!("SELECT username FROM users",)
+        .fetch_one(&mut connection)
+        .await
+        .expect("Failed to fetch saved user.");
+
+    assert_eq!(saved.username, "testuser");
+
 }
 
 fn spawn_app() -> String {
