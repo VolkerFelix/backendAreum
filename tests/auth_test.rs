@@ -1,6 +1,3 @@
-use actix_web::test;
-use actix_web::dev::Server;
-use chrono::format::StrftimeItems;
 use reqwest::Client;
 use std::net::TcpListener;
 use serde_json::json;
@@ -8,7 +5,7 @@ use serde_json::json;
 use areum_backend::run;
 
 #[tokio::test]
-async fn test_register_user() {
+async fn register_user_working() {
     let address = spawn_app();
     let client = Client::new();
 

@@ -40,44 +40,6 @@ jobs:
             - name: Install the Rust toolchain
               uses: actions-rust-lang/setup-rust-toolchain@v1
 
-            # - name: Install cargo-chef
-            #   run: cargo install cargo-chef
-
-            # - name: Prepare build plan
-            #   run: cargo chef prepare --recipe-path recipe.json
-      
-            # - name: Cache dependencies
-            #   uses: actions/cache@v3
-            #   with:
-            #     path: target
-            #     key: ${{ runner.os }}-cargo-chef-${{ hashFiles('recipe.json') }}
-            #     restore-keys: |
-            #       ${{ runner.os }}-cargo-chef-
-      
-            # - name: Build dependencies
-            #   run: cargo chef cook --recipe-path recipe.json --release
-      
-            # - name: Cache Cargo Bin
-            #   uses: actions/cache@v3
-            #   with:
-            #     path: ~/.cargo/bin
-            #     key: ${{ runner.os }}-cargo-bin-${{ vars.SQLX_CLI_VERSION }}
-            #     restore-keys: |
-            #       ${{ runner.os }}-cargo-bin-
-
-            # - name: Add Cargo bin to PATH
-            #   run: |
-            #     echo "Adding Cargo bin to PATH"
-            #     echo "${HOME}/.cargo/bin" >> $GITHUB_PATH
-      
-            # - name: Verify PATH
-            #   run: |
-            #     echo "Current PATH:"
-            #     echo $PATH
-            #     echo "Contents of GITHUB_PATH:"
-            #     cat $GITHUB_PATH
-            #     ls -la $HOME/.cargo/bin
-
             - name: Install sqlx-cli
               run: |
                 if ! command -v sqlx &> /dev/null; then

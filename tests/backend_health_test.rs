@@ -1,13 +1,10 @@
-use actix_web::test;
-use actix_web::dev::Server;
-use chrono::format::StrftimeItems;
 use reqwest::Client;
 use std::net::TcpListener;
 
 use areum_backend::run;
 
 #[tokio::test]
-async fn test_backend_health() {
+async fn backend_health_working() {
     let address = spawn_app();
     let client = Client::new();
 
