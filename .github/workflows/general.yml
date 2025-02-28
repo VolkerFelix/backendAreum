@@ -38,6 +38,13 @@ jobs:
         steps:
             - name: Check out repository code
               uses: actions/checkout@v4
+
+            # Add the check for SQLx prepare files
+            - name: Check SQLx prepare files
+              run: |
+                echo "Checking .sqlx directory:"
+                ls -la .sqlx/ || echo ".sqlx directory not found"
+                echo "Number of prepare files: $(find .sqlx -type f 2>/dev/null | wc -l || echo '0')"
     
             - name: Install the Rust toolchain
               uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -80,6 +87,26 @@ jobs:
             - name: Migrate database
               run: |
                 SKIP_DOCKER=true ./scripts/init_db.sh
+
+            # Add this step to generate SQLx prepare files if they don't exist
+            - name: Generate SQLx prepare files
+              run: |
+                # Only generate if the .sqlx directory doesn't exist or is empty
+                if [ ! -d ".sqlx" ] || [ -z "$(ls -A .sqlx 2>/dev/null)" ]; then
+                  echo "Generating SQLx prepare files..."
+                  # Set DATABASE_URL for prepare
+                  export DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB_NAME}"
+                  echo "Using DATABASE_URL: postgres://${POSTGRES_USER}:[REDACTED]@localhost:${POSTGRES_PORT}/${POSTGRES_DB_NAME}"
+                  
+                  # Generate prepare files
+                  cargo sqlx prepare --workspace -- --all-targets
+                  
+                  # Verify files were created
+                  echo "Generated SQLx prepare files:"
+                  ls -la .sqlx/ || echo "Failed to generate .sqlx directory"
+                else
+                  echo "SQLx prepare files already exist, skipping generation"
+                fi
               
             - name: Run tests
               env:
