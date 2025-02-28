@@ -22,15 +22,14 @@ jobs:
               POSTGRES_USER: ${{secrets.POSTGRES_USER}}
               POSTGRES_PASSWORD: ${{secrets.POSTGRES_PASSWORD}}
               POSTGRES_DB: ${{secrets.POSTGRES_DB_NAME}}
-              POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
             ports:
-              - ${POSTGRES_PORT}:5432
+              - ${{vars.POSTGRES_PORT}}:5432
         
         env:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB_NAME: ${{ secrets.POSTGRES_DB_NAME }}
-          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          POSTGRES_PORT: ${{ vars.POSTGRES_PORT }}
           POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
           APP_USER: ${{ secrets.APP_USER }}
           APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
