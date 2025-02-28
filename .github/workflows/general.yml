@@ -38,13 +38,6 @@ jobs:
         steps:
             - name: Check out repository code
               uses: actions/checkout@v4
-
-            # Add the check for SQLx prepare files
-            - name: Check SQLx prepare files
-              run: |
-                echo "Checking .sqlx directory:"
-                ls -la .sqlx/ || echo ".sqlx directory not found"
-                echo "Number of prepare files: $(find .sqlx -type f 2>/dev/null | wc -l || echo '0')"
     
             - name: Install the Rust toolchain
               uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -78,11 +71,11 @@ jobs:
         
                 # Create the application user
                 CREATE_QUERY="CREATE USER ${APP_USER} WITH PASSWORD '${APP_USER_PW}';"
-                PGPASSWORD="${POSTGRES_PASSWORD}" psql -U "${POSTGRES_USER}" -h "localhost" -c "${CREATE_QUERY}"
+                PGPASSWORD="${POSTGRES_PASSWORD}" psql -U "${POSTGRES_USER}" -h "${POSTGRES_HOST}" -c "${CREATE_QUERY}"
         
                 # Grant create db privileges to the app user
                 GRANT_QUERY="ALTER USER ${APP_USER} CREATEDB;"
-                PGPASSWORD="${POSTGRES_PASSWORD}" psql -U "${POSTGRES_USER}" -h "localhost" -c "${GRANT_QUERY}"
+                PGPASSWORD="${POSTGRES_PASSWORD}" psql -U "${POSTGRES_USER}" -h "${POSTGRES_HOST}" -c "${GRANT_QUERY}"
             
             - name: Migrate database
               run: |
@@ -91,19 +84,17 @@ jobs:
             - name: Generate SQLx prepare files
               env:
                   RUSTFLAGS: "-A warnings"
+                  SQLX_OFFLINE: false
+                  DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB_NAME}
               run: |
-                # Force SQLx prepare to run with online mode first
                 echo "Forcing SQLx prepare generation..."
-                export SQLX_OFFLINE=false
-                export DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB_NAME}"
-                echo "Using DATABASE_URL: postgres://${POSTGRES_USER}:[REDACTED]@localhost:${POSTGRES_PORT}/${POSTGRES_DB_NAME}"
                 
                 # List all source files with sqlx::query! macros
-                echo "Files containing sqlx queries:"
-                grep -r "sqlx::query" --include="*.rs" . || echo "No sqlx queries found"
+                #echo "Files containing sqlx queries:"
+                #grep -r "sqlx::query" --include="*.rs" . || echo "No sqlx queries found"
                 
                 # Make sure schema is ready by re-running migrations
-                SKIP_DOCKER=true DATABASE_URL="$DATABASE_URL" ./scripts/init_db.sh
+                #SKIP_DOCKER=true DATABASE_URL="$DATABASE_URL" ./scripts/init_db.sh
                 
                 # Generate prepare files with verbose output
                 RUST_LOG=debug cargo sqlx prepare --workspace -- --all-targets
