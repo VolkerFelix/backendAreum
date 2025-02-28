@@ -28,10 +28,13 @@ jobs:
         env:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB_NAME: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_DB_NAME: ${{ secrets.POSTGRES_DB_NAME }}
           POSTGRES_PORT: ${{ vars.POSTGRES_PORT }}
+          POSTGRES_HOST: ${{ vars.POSTGRES_HOST }}
           APP_USER: ${{ secrets.APP_USER }}
-          APP_USER_PW: ${{ secrets.APP_USER_PW }}
+          APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
+          APP_PORT: ${{ secrets.APP_PORT }}
+
 
         steps:
             - name: Check out repository code
