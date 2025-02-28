@@ -88,14 +88,11 @@ jobs:
                   DATABASE_URL: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@${{ secrets.POSTGRES_HOST }}:${{ vars.POSTGRES_PORT }}/${{ secrets.POSTGRES_DB_NAME }}
               run: |
                 cargo sqlx prepare --workspace -- --all-targets
-                
-                # Switch back to offline mode for subsequent steps
-                #export SQLX_OFFLINE=true
               
-            - name: Run tests with explicit DATABASE_URL
+            - name: Run tests
               env:
                 RUSTFLAGS: "-A warnings"
-                SQLX_OFFLINE: true
+                SQLX_OFFLINE: false
                 DATABASE_URL: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@${{ secrets.POSTGRES_HOST }}:${{ vars.POSTGRES_PORT }}/${{ secrets.POSTGRES_DB_NAME }}
               run: cargo test --all
 
