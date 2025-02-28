@@ -1,9 +1,9 @@
-use actix_web::{App, HttpServer};
+use actix_web::{web, App, HttpServer};
 use actix_web::dev::Server;
+use sqlx::PgPool;
 use std::net::TcpListener;
 
 pub mod config;
-mod db;
 mod routes;
 mod handlers;
 mod models;
@@ -11,13 +11,14 @@ mod utils;
 
 use crate::routes::init_routes;
 
-pub fn run(listener: TcpListener) -> Result<Server, std::io::Error> {
-    //let pool = db::init_db().await;
-
-    let server = HttpServer::new(move || {
+pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Error> {
+    // Wrap the pool using web::Data, which boils down to an Arc smart pointer
+    let db_pool = web::Data::new(db_pool);
+    let server = HttpServer::new( move || {
         App::new()
-            //.app_data(actix_web::web::Data::new(pool.clone()))
             .configure(init_routes)
+            // Get a pointer copy and attach it to the application state
+            .app_data(db_pool.clone())
     })
     .listen(listener)?
     .run();

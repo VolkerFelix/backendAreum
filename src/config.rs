@@ -1,6 +1,5 @@
 use dotenv::dotenv;
 use std::env::{self, VarError};
-use config::{Config, Environment};
 
 #[derive(serde::Deserialize, Debug)]
 pub struct Settings{
@@ -22,6 +21,13 @@ impl DatabaseSettings {
         format!(
             "postgres://{}:{}@{}:{}/{}",
             self.user, self.password, self.host, self.port, self.db_name
+        )
+    }
+
+    pub fn connection_string_without_db(&self) -> String {
+        format!(
+            "postgres://{}:{}@{}:{}",
+            self.user, self.password, self.host, self.port
         )
     }
 }

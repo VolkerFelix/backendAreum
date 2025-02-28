@@ -1,4 +1,4 @@
-use actix_web::web::{self, service};
+use actix_web::web;
 
 pub mod auth;
 pub mod backend_health;

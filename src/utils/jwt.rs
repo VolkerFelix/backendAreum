@@ -3,7 +3,7 @@ use jsonwebtoken::{encode, Header, EncodingKey};
 use crate::models::user::User;
 use chrono::{Utc, Duration};
 
-const SECRET_KEY: &str = "mysecretkey";
+const _SECRET_KEY: &str = "mysecretkey";
 
 pub fn create_jwt(user: &User) -> String {
     let expiration = Utc::now() + Duration::hours(24);
@@ -12,5 +12,5 @@ pub fn create_jwt(user: &User) -> String {
         "exp": expiration.timestamp(),
     });
 
-    encode(&Header::default(), &claims, &EncodingKey::from_secret(SECRET_KEY.as_ref())).unwrap()
+    encode(&Header::default(), &claims, &EncodingKey::from_secret(_SECRET_KEY.as_ref())).unwrap()
 }
