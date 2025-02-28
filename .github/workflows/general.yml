@@ -85,34 +85,12 @@ jobs:
               env:
                   RUSTFLAGS: "-A warnings"
                   SQLX_OFFLINE: false
+                  DATABASE_URL: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@${{ secrets.POSTGRES_HOST }}:${{ vars.POSTGRES_PORT }}/${{ secrets.POSTGRES_DB_NAME }}
               run: |
-                echo "Forcing SQLx prepare generation..."
-                export DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB_NAME}"
-                
-                # List all source files with sqlx::query! macros
-                #echo "Files containing sqlx queries:"
-                #grep -r "sqlx::query" --include="*.rs" . || echo "No sqlx queries found"
-                
-                # Make sure schema is ready by re-running migrations
-                #SKIP_DOCKER=true DATABASE_URL="$DATABASE_URL" ./scripts/init_db.sh
-                
-                # Generate prepare files with verbose output
-                RUST_LOG=debug cargo sqlx prepare --workspace -- --all-targets
-                
-                # Verify files were created
-                echo "Generated SQLx prepare files:"
-                find .sqlx -type f | sort
-                
-                # Show contents of one prepare file as example
-                if [ -d ".sqlx" ] && [ "$(find .sqlx -type f | wc -l)" -gt 0 ]; then
-                  echo "Example prepare file content:"
-                  head -n 20 "$(find .sqlx -type f | head -1)"
-                else
-                  echo "No prepare files were generated!"
-                fi
+                cargo sqlx prepare --workspace -- --all-targets
                 
                 # Switch back to offline mode for subsequent steps
-                export SQLX_OFFLINE=true
+                #export SQLX_OFFLINE=true
               
             - name: Run tests with explicit DATABASE_URL
               env:
