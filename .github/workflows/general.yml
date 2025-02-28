@@ -108,9 +108,11 @@ jobs:
                   echo "SQLx prepare files already exist, skipping generation"
                 fi
               
-            - name: Run tests
+            - name: Run tests with explicit DATABASE_URL
               env:
                 RUSTFLAGS: "-A warnings"
+                SQLX_OFFLINE: true
+                DATABASE_URL: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@${{ secrets.POSTGRES_HOST }}:${{ vars.POSTGRES_PORT }}/${{ secrets.POSTGRES_DB_NAME }}
               run: cargo test --all
 
             - name: Check that queries are fresh
