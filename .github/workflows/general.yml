@@ -88,25 +88,38 @@ jobs:
               run: |
                 SKIP_DOCKER=true ./scripts/init_db.sh
 
-            # Add this step to generate SQLx prepare files if they don't exist
             - name: Generate SQLx prepare files
               run: |
-                # Only generate if the .sqlx directory doesn't exist or is empty
-                if [ ! -d ".sqlx" ] || [ -z "$(ls -A .sqlx 2>/dev/null)" ]; then
-                  echo "Generating SQLx prepare files..."
-                  # Set DATABASE_URL for prepare
-                  export DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB_NAME}"
-                  echo "Using DATABASE_URL: postgres://${POSTGRES_USER}:[REDACTED]@localhost:${POSTGRES_PORT}/${POSTGRES_DB_NAME}"
-                  
-                  # Generate prepare files
-                  cargo sqlx prepare --workspace -- --all-targets
-                  
-                  # Verify files were created
-                  echo "Generated SQLx prepare files:"
-                  ls -la .sqlx/ || echo "Failed to generate .sqlx directory"
+                # Force SQLx prepare to run with online mode first
+                echo "Forcing SQLx prepare generation..."
+                export SQLX_OFFLINE=false
+                export DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB_NAME}"
+                echo "Using DATABASE_URL: postgres://${POSTGRES_USER}:[REDACTED]@localhost:${POSTGRES_PORT}/${POSTGRES_DB_NAME}"
+                
+                # List all source files with sqlx::query! macros
+                echo "Files containing sqlx queries:"
+                grep -r "sqlx::query" --include="*.rs" . || echo "No sqlx queries found"
+                
+                # Make sure schema is ready by re-running migrations
+                SKIP_DOCKER=true DATABASE_URL="$DATABASE_URL" ./scripts/init_db.sh
+                
+                # Generate prepare files with verbose output
+                RUST_LOG=debug cargo sqlx prepare --workspace -- --all-targets
+                
+                # Verify files were created
+                echo "Generated SQLx prepare files:"
+                find .sqlx -type f | sort
+                
+                # Show contents of one prepare file as example
+                if [ -d ".sqlx" ] && [ "$(find .sqlx -type f | wc -l)" -gt 0 ]; then
+                  echo "Example prepare file content:"
+                  head -n 20 "$(find .sqlx -type f | head -1)"
                 else
-                  echo "SQLx prepare files already exist, skipping generation"
+                  echo "No prepare files were generated!"
                 fi
+                
+                # Switch back to offline mode for subsequent steps
+                export SQLX_OFFLINE=true
               
             - name: Run tests with explicit DATABASE_URL
               env:
