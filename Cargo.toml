@@ -25,17 +25,11 @@ sqlx-cli = { version = "0.8.3", features = ["postgres"] }
 tokio = { version = "1.43.0", features = ["full", "test-util", "macros", "rt-multi-thread"] }
 config = "0.15.8"
 tracing = "0.1.40"
-tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
-tracing-bunyan-formatter = "0.3.9"
+env_logger = "0.11.6"
+tracing-subscriber = { version = "0.3.19", features = ["registry", "env-filter"] }
+tracing-bunyan-formatter = "0.3.10"
 tracing-log = "0.2.0"
-tracing-actix-web = "0.7.10"
 
 [dev-dependencies]
 reqwest = { version = "0.12.12", features = ["json"] }
 tokio = { version = "1.43.0", features = ["full", "macros", "rt-multi-thread"] }
-
-[profile.dev]
-#incremental = true
-
-[profile.release]
-#incremental = true
