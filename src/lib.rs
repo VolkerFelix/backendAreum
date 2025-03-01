@@ -2,8 +2,10 @@ use actix_web::{web, App, HttpServer};
 use actix_web::dev::Server;
 use sqlx::PgPool;
 use std::net::TcpListener;
+use tracing_actix_web::TracingLogger;
 
 pub mod config;
+pub mod telemetry;
 mod routes;
 mod handlers;
 mod models;
@@ -16,6 +18,7 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
     let db_pool = web::Data::new(db_pool);
     let server = HttpServer::new( move || {
         App::new()
+            .wrap(TracingLogger::default())
             .configure(init_routes)
             // Get a pointer copy and attach it to the application state
             .app_data(db_pool.clone())
