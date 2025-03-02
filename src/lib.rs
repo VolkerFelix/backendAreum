@@ -9,6 +9,7 @@ mod routes;
 mod handlers;
 mod models;
 mod utils;
+pub mod telemetry;
 
 use crate::routes::init_routes;
 
