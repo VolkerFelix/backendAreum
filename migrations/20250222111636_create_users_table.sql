@@ -4,5 +4,6 @@ CREATE TABLE IF NOT EXISTS users (
     PRIMARY KEY (id),
     username TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
     created_at timestamptz NOT NULL
 );

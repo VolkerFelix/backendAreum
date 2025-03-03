@@ -11,7 +11,8 @@ async fn register_user_working() {
 
     let user_request = json!({
         "username": "testuser",
-        "password": "password123"
+        "password": "password123",
+        "email": "testuser@gmail.com"
     });
 
     let response = client
@@ -23,10 +24,11 @@ async fn register_user_working() {
 
     assert!(response.status().is_success());
 
-    let saved = sqlx::query!("SELECT username FROM users",)
+    let saved = sqlx::query!("SELECT username, email FROM users",)
         .fetch_one(&test_app.db_pool)
         .await
         .expect("Failed to fetch saved user.");
 
     assert_eq!(saved.username, "testuser");
+    assert_eq!(saved.email, "testuser@gmail.com");
 }

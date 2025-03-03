@@ -3,7 +3,7 @@ use sqlx::PgPool;
 use chrono::Utc;
 use uuid::Uuid;
 
-use crate::models::user::AuthRequest;
+use crate::models::user::RegistrationRequest;
 use crate::utils::password::hash_password;
 
 #[tracing::instrument(
@@ -11,11 +11,12 @@ use crate::utils::password::hash_password;
     // Don't show arguments
     skip(user_form, pool),
     fields(
-        subscriber_email = %user_form.username,
+        username = %user_form.username,
+        email = %user_form
     )
 )]
 pub async fn register_user(
-    user_form: web::Json<AuthRequest>,
+    user_form: web::Json<RegistrationRequest>,
     pool: web::Data<PgPool>
 ) -> HttpResponse {
     match insert_user(&user_form, &pool).await
@@ -26,17 +27,18 @@ pub async fn register_user(
 }
 
 pub async fn insert_user(
-    user_form: &web::Json<AuthRequest>,
+    user_form: &web::Json<RegistrationRequest>,
     pool: &PgPool
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
         r#"
-        INSERT INTO users (id, username, password, created_at)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO users (id, username, password, email, created_at)
+        VALUES ($1, $2, $3, $4, $5)
         "#,
         Uuid::new_v4(),
         &user_form.username,
         &hash_password(&user_form.password),
+        &user_form.email,
         Utc::now()
     )
     .execute(pool)
