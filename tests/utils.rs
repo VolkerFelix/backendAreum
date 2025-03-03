@@ -1,9 +1,35 @@
+use secrecy::ExposeSecret;
 use sqlx::{PgPool, PgConnection, Connection, Executor};
 use std::net::TcpListener;
 use uuid::Uuid;
+use once_cell::sync::Lazy;
 
 use areum_backend::run;
 use areum_backend::config::{get_config, DatabaseSettings};
+use areum_backend::telemetry::{get_subscriber, init_subscriber};
+
+// Ensure that the `tracing` stack is only initialised once using `once_cell`
+static TRACING: Lazy<()> = Lazy::new(|| {
+    let default_filter_level = "info".to_string();
+    let subscriber_name = "test".to_string();
+
+    if std::env::var("TEST_LOG").is_ok() {
+        let subscriber = get_subscriber(
+            subscriber_name, 
+            default_filter_level,
+            std::io::stdout
+        );
+        init_subscriber(subscriber);
+    } else {
+        let subscriber = get_subscriber(
+            subscriber_name, 
+            default_filter_level,
+            std::io::sink
+        );
+        init_subscriber(subscriber);
+    }
+
+});
 
 pub struct TestApp{
     pub address: String,
@@ -11,6 +37,10 @@ pub struct TestApp{
 }
 
 pub async fn spawn_app() -> TestApp {
+    // The first time `initialize` is invoked the code in `TRACING` is executed.
+    // All other invocations will instead skip execution.
+    Lazy::force(&TRACING);
+
     let listener = TcpListener::bind("127.0.0.1:0")
         .expect("Failed to bind random port");
     // Get port assigned by the OS
@@ -45,7 +75,7 @@ pub async fn configure_db(config: &DatabaseSettings) -> PgPool {
         .expect("Failed to create database.");
 
     // Migrate database
-    let connection_pool = PgPool::connect(&config.connection_string())
+    let connection_pool = PgPool::connect(&config.connection_string().expose_secret())
         .await
         .expect("Failed to connect to Postgres.");
     sqlx::migrate!("./migrations")

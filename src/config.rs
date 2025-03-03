@@ -1,5 +1,6 @@
 use dotenv::dotenv;
 use std::env::{self, VarError};
+use secrecy::{SecretBox, ExposeSecret};
 
 #[derive(serde::Deserialize, Debug)]
 pub struct Settings{
@@ -10,24 +11,24 @@ pub struct Settings{
 #[derive(serde::Deserialize, Debug)]
 pub struct DatabaseSettings{
     pub user: String,
-    pub password: String,
+    pub password: SecretBox<String>,
     pub port: u16,
     pub host: String,
     pub db_name: String
 }
 
 impl DatabaseSettings {
-    pub fn connection_string(&self) -> String {
-        format!(
+    pub fn connection_string(&self) -> SecretBox<String> {
+        SecretBox::new(Box::new(format!(
             "postgres://{}:{}@{}:{}/{}",
-            self.user, self.password, self.host, self.port, self.db_name
-        )
+            self.user, self.password.expose_secret(), self.host, self.port, self.db_name
+        )))
     }
 
     pub fn connection_string_without_db(&self) -> String {
         format!(
             "postgres://{}:{}@{}:{}",
-            self.user, self.password, self.host, self.port
+            self.user, self.password.expose_secret(), self.host, self.port
         )
     }
 }
@@ -44,7 +45,7 @@ pub fn get_config() -> Result<Settings, VarError> {
 
     let db_settings = DatabaseSettings {
         user: env::var("POSTGRES_USER")?,
-        password: env::var("POSTGRES_PASSWORD")?,
+        password: SecretBox::new(Box::new(env::var("POSTGRES_PASSWORD")?)),
         port: env::var("POSTGRES_PORT")
             .ok().and_then(|s| s.parse().ok()).unwrap(),
         host: env::var("POSTGRES_HOST")?,
