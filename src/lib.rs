@@ -3,7 +3,6 @@ use actix_web::dev::Server;
 use tracing_actix_web::TracingLogger;
 use sqlx::PgPool;
 use std::net::TcpListener;
-
 pub mod config;
 mod routes;
 mod handlers;
