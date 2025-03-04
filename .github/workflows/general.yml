@@ -34,6 +34,7 @@ jobs:
           APP_USER: ${{ secrets.APP_USER }}
           APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
           APP_PORT: ${{ secrets.APP_PORT }}
+          APP_HOST: ${{ secrets.APP_HOST }}
 
         steps:
             - name: Check out repository code

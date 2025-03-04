@@ -1,7 +1,7 @@
 use reqwest::Client;
 
-mod utils;
-use utils::spawn_app;
+mod common;
+use common::utils::spawn_app;
 
 #[tokio::test]
 async fn backend_health_working() {
