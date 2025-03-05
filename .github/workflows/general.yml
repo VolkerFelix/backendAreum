@@ -67,12 +67,12 @@ jobs:
                 done
         
                 # Create the application user
-                CREATE_QUERY="CREATE USER ${APP_USER} WITH PASSWORD '${APP_USER_PW}';"
-                PGPASSWORD="${POSTGRES_PASSWORD}" psql -U "${POSTGRES_USER}" -h "${POSTGRES_HOST}" -c "${CREATE_QUERY}"
+                CREATE_QUERY="CREATE USER {$APP__APPLICATION__USER} WITH PASSWORD '${APP__APPLICATION__PASSWORD}';"
+                PGPASSWORD="${POSTGRES__DATABASE__PASSWORD}" psql -U "${POSTGRES__DATABASE__USER}" -h "localhost" -c "${CREATE_QUERY}"
         
                 # Grant create db privileges to the app user
-                GRANT_QUERY="ALTER USER ${APP_USER} CREATEDB;"
-                PGPASSWORD="${POSTGRES_PASSWORD}" psql -U "${POSTGRES_USER}" -h "${POSTGRES_HOST}" -c "${GRANT_QUERY}"
+                GRANT_QUERY="ALTER USER ${APP__APPLICATION__USER} CREATEDB;"
+                PGPASSWORD="${POSTGRES__DATABASE__PASSWORD}" psql -U "${POSTGRES__DATABASE__USER}" -h "localhost" -c "${GRANT_QUERY}"
             
             - name: Migrate database
               run: |
