@@ -1,6 +1,6 @@
+use std::env;
 use config::{Config, File, ConfigError};
 use dotenv::dotenv;
-use std::{env::{self, VarError}};
 use secrecy::{ExposeSecret, SecretString};
 
 #[derive(serde::Deserialize, Debug)]
