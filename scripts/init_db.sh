@@ -32,8 +32,8 @@ fi
 if [[ -z "${SKIP_DOCKER}" ]]
 then
     docker run \
-    -e POSTGRES_USER=${POSTGRES_USER} \
-    -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
+    -e POSTGRES_USER=${POSTGRES__DATABASE__USER} \
+    -e POSTGRES_PASSWORD=${POSTGRES__DATABASE__PASSWORD} \
     -e POSTGRES_DB=areum_db \
     -p 5432:5432 \
     -d postgres \
@@ -41,15 +41,15 @@ then
 fi
 
 # Keep pinging Postgres until it's ready to accept commands
-export PGPASSWORD="${POSTGRES_PASSWORD}"
-until psql -h "localhost" -U "${POSTGRES_USER}" -p 5432 -d areum_db -c '\q'; do
+export PGPASSWORD="${POSTGRES__DATABASE__PASSWORD}"
+until psql -h "localhost" -U "${POSTGRES__DATABASE__USER}" -p 5432 -d areum_db -c '\q'; do
     >&2 echo "Postgres is still unavailable - sleeping"
     sleep 1
 done
 
 >&2 echo "Postgres is up and running on port 5432 - running migrations now!"
 
-DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/areum_db
+DATABASE_URL=postgres://${POSTGRES__DATABASE__USER}:${POSTGRES__DATABASE__PASSWORD}@localhost:5432/areum_db
 export DATABASE_URL
 sqlx database create
 sqlx migrate run
