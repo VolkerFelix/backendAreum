@@ -15,15 +15,22 @@ pub struct DatabaseSettings{
     pub password: SecretString,
     pub port: u16,
     pub host: String,
-    pub db_name: String
+    pub db_name: String,
+    #[serde(default)]
+    pub db_url: Option<SecretString>
 }
 
 impl DatabaseSettings {
     pub fn connection_string(&self) -> SecretString {
-        SecretString::new(format!(
-            "postgres://{}:{}@{}:{}/{}",
-            self.user, self.password.expose_secret(), self.host, self.port, self.db_name
-        ).into_boxed_str())
+        match &self.db_url {
+            Some(db_url) => db_url.clone(),
+            None => {
+                SecretString::new(format!(
+                    "postgres://{}:{}@{}:{}/{}",
+                    self.user, self.password.expose_secret(), self.host, self.port, self.db_name
+                ).into_boxed_str())
+            }
+        }
     }
 
     pub fn connection_string_without_db(&self) -> String {
@@ -56,7 +63,7 @@ pub fn get_config() -> Result<Settings, ConfigError> {
         .expect("Failed to parse APP_ENVIRONMENT.");
 
     let env_filename = format!("{}.yml", environment.as_str());
-    let settings = Config::builder()
+    let config = Config::builder()
         .add_source(File::from(configuration_directory.join("base.yml")))
         .add_source(File::from(configuration_directory.join(env_filename)))
         .add_source(
@@ -73,7 +80,13 @@ pub fn get_config() -> Result<Settings, ConfigError> {
         )
         .build()?;
 
-    settings.try_deserialize::<Settings>()
+    let mut settings = config.try_deserialize::<Settings>()?;
+
+    // In Fly.io the DATABASE_URL is directly exposed as an env var
+    if let Ok(db_url) = env::var("DATABASE_URL") {
+        settings.database.db_url = Some(SecretString::new(db_url.into_boxed_str()));
+    }
+    Ok(settings)
 }
 
 pub enum Environment {
