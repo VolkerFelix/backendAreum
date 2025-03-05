@@ -1,5 +1,6 @@
+use config::{Config, File, ConfigError};
 use dotenv::dotenv;
-use std::env::{self, VarError};
+use std::{env::{self, VarError}};
 use secrecy::{ExposeSecret, SecretString};
 
 #[derive(serde::Deserialize, Debug)]
@@ -39,32 +40,68 @@ pub struct ApplicationSettings{
     pub password: SecretString, 
     pub port: u16,
     pub host: String,
+    pub log_level: String
 }
 
-pub fn get_config() -> Result<Settings, VarError> {
+pub fn get_config() -> Result<Settings, ConfigError> {
+    let base_path = std::env::current_dir()
+        .expect("Failed to determine the current directory");
+    let configuration_directory = base_path.join("configuration");
+    
     dotenv().ok();
 
-    let db_settings = DatabaseSettings {
-        user: env::var("POSTGRES_USER")?,
-        password: SecretString::new(env::var("POSTGRES_PASSWORD")?.into_boxed_str()),
-        port: env::var("POSTGRES_PORT")
-            .ok().and_then(|s| s.parse().ok()).unwrap(),
-        host: env::var("POSTGRES_HOST")?,
-        db_name: env::var("POSTGRES_DB_NAME")?,
-    };
+    let environment: Environment = env::var("APP_ENVIRONMENT")
+        .unwrap_or_else(|_| "local".into())
+        .try_into()
+        .expect("Failed to parse APP_ENVIRONMENT.");
 
-    let app_settings = ApplicationSettings {
-        user: env::var("APP_USER")?,
-        password: SecretString::new(env::var("APP_PASSWORD")?.into_boxed_str()),
-        port: env::var("APP_PORT")
-            .ok().and_then(|s| s.parse().ok()).unwrap(),
-        host: env::var("APP_HOST")?,
-    };
+    let env_filename = format!("{}.yml", environment.as_str());
+    let settings = Config::builder()
+        .add_source(File::from(configuration_directory.join("base.yml")))
+        .add_source(File::from(configuration_directory.join(env_filename)))
+        .add_source(
+            config::Environment::default()
+                .prefix("POSTGRES")
+                .prefix_separator("__")
+                .separator("__")
+        )
+        .add_source(
+            config::Environment::default()
+                .prefix("APP")
+                .prefix_separator("__")
+                .separator("__")
+        )
+        .build()?;
 
-    let settings = Settings {
-        database: db_settings,
-        application: app_settings,
-    };
+    settings.try_deserialize::<Settings>()
+}
 
-    Ok(settings)
+pub enum Environment {
+    Local,
+    Production,
+}
+
+impl Environment {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Environment::Local => "local",
+            Environment::Production => "production",
+        }
+    }
+}
+
+impl TryFrom<String> for Environment {
+    type Error = String;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        match s.to_lowercase().as_str() {
+            "local" => Ok(Self::Local),
+            "production" => Ok(Self::Production),
+            other => Err(format!(
+                "{} is not a supported environment. \
+                Use either `local` or `production`.",
+                other
+            )),
+        }
+    }
 }

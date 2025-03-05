@@ -1,0 +1,8 @@
+application:
+  host: 0.0.0.0
+  port: 8080
+  log_level: info
+database:
+  host: localhost
+  port: 5432
+  db_name: areum_db
