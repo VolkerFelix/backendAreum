@@ -1,6 +1,7 @@
 use std::net::TcpListener;
 use secrecy::ExposeSecret;
-use sqlx::PgPool;
+use sqlx::postgres::PgPoolOptions;
+use std::time::Duration;
 
 use areum_backend::run;
 use areum_backend::config::get_config;
@@ -16,8 +17,10 @@ async fn main() -> std::io::Result<()> {
     // Panic if we can't read the config
     let config = get_config().expect("Failed to read the config.");
     // Only try to establish connection when actually used
-    let conection_pool = PgPool::connect_lazy(
-        &config.database.connection_string().expose_secret()
+    let conection_pool = PgPoolOptions::new()
+        .acquire_timeout(Duration::from_secs(2))
+        .connect_lazy(
+            &config.database.connection_string().expose_secret()
         )
         .expect("Failed to create Postgres connection pool");
     let address = format!("{}:{}", config.application.host, config.application.port);
