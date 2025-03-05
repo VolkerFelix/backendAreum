@@ -67,7 +67,7 @@ jobs:
                 done
         
                 # Create the application user
-                CREATE_QUERY="CREATE USER {$APP__APPLICATION__USER} WITH PASSWORD '${APP__APPLICATION__PASSWORD}';"
+                CREATE_QUERY="CREATE USER ${APP__APPLICATION__USER} WITH PASSWORD '${APP__APPLICATION__PASSWORD}';"
                 PGPASSWORD="${POSTGRES__DATABASE__PASSWORD}" psql -U "${POSTGRES__DATABASE__USER}" -h "localhost" -c "${CREATE_QUERY}"
         
                 # Grant create db privileges to the app user
