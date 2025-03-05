@@ -1,14 +1,25 @@
-# Stage 1: Build the application
-FROM rust:1.84 AS builder
-
-RUN apt-get update && apt-get install -y libssl-dev pkg-config
-
+# Stage 1: Generate recipe file
+FROM rust:1.84 AS chef
+RUN cargo install cargo-chef
 WORKDIR /app
-COPY . .
 
+# Stage 2: Prepare build cache
+FROM chef AS planner
+COPY . .
+RUN cargo chef prepare --recipe-path recipe.json
+
+# Stage 3: Build dependencies - this is cached unless dependencies change
+FROM chef AS builder
+WORKDIR /app
+COPY --from=planner /app/recipe.json recipe.json
+# Build dependencies only
+RUN cargo chef cook --release --recipe-path recipe.json
+
+# Stage 4: Build application - this only rebuilds your actual code
+COPY . .
 RUN cargo build --release
 
-# Stage 2: Runtime environment
+# Stage 5: Runtime environment
 FROM debian:bookworm-slim
 
 RUN apt-get update -y \
