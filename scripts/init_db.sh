@@ -34,22 +34,22 @@ then
     docker run \
     -e POSTGRES_USER=${POSTGRES_USER} \
     -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
-    -e POSTGRES_DB=${POSTGRES_DB_NAME} \
-    -p "${POSTGRES_PORT}":5432 \
+    -e POSTGRES_DB=areum_db \
+    -p 5432:5432 \
     -d postgres \
     postgres -N 1000
 fi
 
 # Keep pinging Postgres until it's ready to accept commands
 export PGPASSWORD="${POSTGRES_PASSWORD}"
-until psql -h "localhost" -U "${POSTGRES_USER}" -p "${POSTGRES_PORT}" -d "${POSTGRES_DB_NAME}" -c '\q'; do
+until psql -h "localhost" -U "${POSTGRES_USER}" -p 5432 -d areum_db -c '\q'; do
     >&2 echo "Postgres is still unavailable - sleeping"
     sleep 1
 done
 
->&2 echo "Postgres is up and running on port ${POSTGRES_PORT} - running migrations now!"
+>&2 echo "Postgres is up and running on port 5432 - running migrations now!"
 
-DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB_NAME}
+DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/areum_db
 export DATABASE_URL
 sqlx database create
 sqlx migrate run
