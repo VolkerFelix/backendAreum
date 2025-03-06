@@ -25,14 +25,14 @@ impl std::fmt::Display for RegistrationRequest{
     }
 }
 
-fn serialize_secret_string<S>(_: &SecretString, serializer: S) -> Result<S::Ok, S::Error>
+pub fn serialize_secret_string<S>(_: &SecretString, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: serde::Serializer,
 {
     serializer.serialize_str("[REDACTED]")
 }
 
-fn deserialize_secret_string<'de, D>(deserializer: D) -> Result<SecretString, D::Error>
+pub fn deserialize_secret_string<'de, D>(deserializer: D) -> Result<SecretString, D::Error>
 where
     D: serde::Deserializer<'de>,
 {

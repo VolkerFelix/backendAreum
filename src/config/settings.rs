@@ -3,10 +3,19 @@ use config::{Config, File, ConfigError};
 use dotenv::dotenv;
 use secrecy::{ExposeSecret, SecretString};
 
+use crate::config::jwt::JwtSettings;
+
 #[derive(serde::Deserialize, Debug)]
 pub struct Settings{
     pub database: DatabaseSettings,
-    pub application: ApplicationSettings
+    pub application: ApplicationSettings,
+    pub jwt: JwtConfig
+}
+
+#[derive(serde::Deserialize, Debug)]
+pub struct JwtConfig {
+    pub secret: SecretString,
+    pub expiration_hours: i64,
 }
 
 #[derive(serde::Deserialize, Debug)]
@@ -86,6 +95,12 @@ pub fn get_config() -> Result<Settings, ConfigError> {
     if let Ok(db_url) = env::var("DATABASE_URL") {
         settings.database.db_url = Some(SecretString::new(db_url.into_boxed_str()));
     }
+
+    // Allow JWT secret override from environment variable
+    if let Ok(jwt_secret) = env::var("JWT_SECRET") {
+        settings.jwt.secret = SecretString::new(jwt_secret.into_boxed_str());
+    }
+
     Ok(settings)
 }
 
@@ -117,4 +132,11 @@ impl TryFrom<String> for Environment {
             )),
         }
     }
+}
+
+pub fn get_jwt_settings(settings: &Settings) -> JwtSettings {
+    JwtSettings::new(
+        settings.jwt.secret.expose_secret().to_string().clone(),
+        settings.jwt.expiration_hours,
+    )
 }

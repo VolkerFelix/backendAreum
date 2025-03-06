@@ -5,7 +5,7 @@ use uuid::Uuid;
 use once_cell::sync::Lazy;
 
 use areum_backend::run;
-use areum_backend::config::{get_config, DatabaseSettings};
+use areum_backend::config::settings::{get_config, DatabaseSettings, get_jwt_settings};
 use areum_backend::telemetry::{get_subscriber, init_subscriber};
 
 // Ensure that the `tracing` stack is only initialised once using `once_cell`
@@ -28,7 +28,6 @@ static TRACING: Lazy<()> = Lazy::new(|| {
         );
         init_subscriber(subscriber);
     }
-
 });
 
 pub struct TestApp{
@@ -50,7 +49,8 @@ pub async fn spawn_app() -> TestApp {
     configuration.database.db_name = Uuid::new_v4().to_string();
     let connection_pool = configure_db(&configuration.database)
         .await;
-    let server = run(listener, connection_pool.clone())
+    let jwt_settings = get_jwt_settings(&configuration);
+    let server = run(listener, connection_pool.clone(), jwt_settings)
         .expect("Failed to bind address");
     // Launch the server as a background task
     // tokio::spawn returns a handle to the spawned future,

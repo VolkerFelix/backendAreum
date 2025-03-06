@@ -10,9 +10,9 @@ async fn register_user_working() {
     let client = Client::new();
 
     let user_request = json!({
-        "username": "testuser",
+        "username": "testuser_reg",
         "password": "password123",
-        "email": "testuser@gmail.com"
+        "email": "testuserreg@gmail.com"
     });
 
     let response = client
@@ -29,6 +29,6 @@ async fn register_user_working() {
         .await
         .expect("Failed to fetch saved user.");
 
-    assert_eq!(saved.username, "testuser");
-    assert_eq!(saved.email, "testuser@gmail.com");
+    assert_eq!(saved.username, "testuser_reg");
+    assert_eq!(saved.email, "testuserreg@gmail.com");
 }
