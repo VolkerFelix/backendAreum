@@ -1,10 +1,7 @@
 // src/middleware/auth.rs
-use std::{future::{ready, Future, Ready}, pin::Pin};
+use std::{future::{ready, Ready}};
 use actix_web::{
-    dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
-    error::ErrorUnauthorized,
-    http::header::{self, HeaderValue},
-    web, Error, HttpMessage,
+    dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform}, error::ErrorUnauthorized, http::header, web, Error, HttpMessage
 };
 use futures_util::future::LocalBoxFuture;
 use jsonwebtoken::{decode, DecodingKey, Validation, Algorithm};
@@ -114,68 +111,4 @@ where
             Ok(res)
         })
     }
-}
-
-// Create a function to wrap a route with authentication
-pub fn require_auth<S, B>(
-    req: ServiceRequest,
-    srv: S,
-) -> Pin<Box<dyn Future<Output = Result<ServiceResponse<B>, Error>>>>
-where
-    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
-{
-    let auth_header = req.headers().get(header::AUTHORIZATION);
-    let jwt_settings = req.app_data::<web::Data<JwtSettings>>().cloned();
-
-    // No JWT settings in app state
-    if jwt_settings.is_none() {
-        return Box::pin(async {
-            Err(ErrorUnauthorized("JWT settings not found"))
-        });
-    }
-
-    // No auth header
-    if auth_header.is_none() {
-        return Box::pin(async {
-            Err(ErrorUnauthorized("No authorization header"))
-        });
-    }
-
-    let auth_header = auth_header.unwrap().to_str().unwrap_or_default();
-    
-    // Check if it's a Bearer token
-    if !auth_header.starts_with("Bearer ") {
-        return Box::pin(async {
-            Err(ErrorUnauthorized("Invalid authorization header format"))
-        });
-    }
-
-    // Extract the token
-    let token = &auth_header[7..]; // Skip "Bearer "
-    let jwt_settings = jwt_settings.unwrap();
-
-    // Decode the token
-    let token_data = match decode::<Claims>(
-        token,
-        &DecodingKey::from_secret(jwt_settings.secret.expose_secret().as_bytes()),
-        &Validation::new(Algorithm::HS256),
-    ) {
-        Ok(c) => c,
-        Err(e) => {
-            return Box::pin(async move {
-                tracing::error!("Failed to decode token: {:?}", e);
-                Err(ErrorUnauthorized("Invalid token"))
-            });
-        }
-    };
-
-    // Store the claims in the request extensions for handlers to access
-    req.extensions_mut().insert(token_data.claims);
-
-    // Call the next service
-    let fut = srv.call(req);
-    Box::pin(async move {
-        let res = fut.await?;
-        Ok(res)
-    })
 }
