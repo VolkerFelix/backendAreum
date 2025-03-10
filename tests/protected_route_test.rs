@@ -1,3 +1,4 @@
+// tests/protected_route_test.rs
 use reqwest::Client;
 use serde_json::json;
 
@@ -5,7 +6,24 @@ mod common;
 use common::utils::spawn_app;
 
 #[tokio::test]
-async fn login_returns_200_for_valid_credentials() {
+async fn protected_route_returns_401_without_token() {
+    // Arrange
+    let test_app = spawn_app().await;
+    let client = Client::new();
+
+    // Act - Try to access a protected endpoint without a token
+    let response = client
+        .get(&format!("{}/protected/resource", &test_app.address))
+        .send()
+        .await
+        .expect("Failed to execute request.");
+
+    // Assert
+    assert_eq!(401, response.status().as_u16());
+}
+
+#[tokio::test]
+async fn protected_route_returns_200_with_valid_token() {
     // Arrange
     let test_app = spawn_app().await;
     let client = Client::new();
@@ -30,8 +48,7 @@ async fn login_returns_200_for_valid_credentials() {
 
     assert_eq!(200, register_response.status().as_u16(), "Registration should succeed");
 
-
-    // Act - Try to login
+    // Login to get a token
     let login_request = json!({
         "username": username,
         "password": password
@@ -44,34 +61,20 @@ async fn login_returns_200_for_valid_credentials() {
         .await
         .expect("Failed to execute login request.");
 
-    // Assert
     assert_eq!(200, login_response.status().as_u16(), "Login should succeed");
-    
-    // Check that the response contains a token
-    let response_body = login_response.json::<serde_json::Value>().await
+
+    let login_json = login_response.json::<serde_json::Value>().await
         .expect("Failed to parse login response as JSON");
-    assert!(response_body.get("token").is_some(), "Response should contain a token");
-}
+    let token = login_json["token"].as_str().expect("Token not found in response");
 
-#[tokio::test]
-async fn login_returns_401_for_invalid_credentials() {
-    // Arrange
-    let test_app = spawn_app().await;
-    let client = Client::new();
-
-    // Act - Try to login with non-existent user
-    let login_request = json!({
-        "username": "nonexistentuser",
-        "password": "wrongpassword"
-    });
-
-    let response = client
-        .post(&format!("{}/login", &test_app.address))
-        .json(&login_request)
+    // Act - Access protected endpoint with token
+    let protected_response = client
+        .get(&format!("{}/protected/resource", &test_app.address))
+        .header("Authorization", format!("Bearer {}", token))
         .send()
         .await
-        .expect("Failed to execute login request.");
+        .expect("Failed to execute request.");
 
     // Assert
-    assert_eq!(401, response.status().as_u16());
+    assert_eq!(200, protected_response.status().as_u16());
 }

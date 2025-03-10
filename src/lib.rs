@@ -9,6 +9,7 @@ mod handlers;
 mod models;
 mod utils;
 pub mod telemetry;
+mod middleware;
 
 use crate::routes::init_routes;
 use crate::config::jwt::JwtSettings;
