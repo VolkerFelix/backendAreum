@@ -5,7 +5,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::middleware::auth::Claims;
-use crate::models::health_data::{HeartRateDataUpload, HealthDataResponse};
+use crate::models::sensor_data::{HeartRateDataUpload, HealthDataResponse};
 
 #[tracing::instrument(
     name = "Upload heart rate data",

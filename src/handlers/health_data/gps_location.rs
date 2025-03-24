@@ -6,7 +6,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::middleware::auth::Claims;
-use crate::models::health_data::{GpsLocationDataUpload, HealthDataResponse, HealthDataTimeQuery};
+use crate::models::sensor_data::{GpsLocationDataUpload, HealthDataResponse, HealthDataTimeQuery};
 
 #[tracing::instrument(
     name = "Upload GPS location data",
