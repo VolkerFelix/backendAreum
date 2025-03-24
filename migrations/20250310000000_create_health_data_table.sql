@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS health_data (
     device_info JSONB NOT NULL,
     sampling_rate_hz INTEGER NOT NULL,
     start_time TIMESTAMPTZ NOT NULL,
+    end_time TIMESTAMPTZ NOT NULL,
     data JSONB NOT NULL,
     created_at TIMESTAMPTZ NOT NULL,
     CONSTRAINT health_data_user_id_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
