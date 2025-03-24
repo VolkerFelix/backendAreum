@@ -1,0 +1,26 @@
+{
+    "data_type": "blood_oxygen",
+    "device_info": {
+      "device_type": "smartwatch",
+      "model": "AppleWatch Series 8",
+      "os_version": "watchOS 10.1",
+      "device_id": "00000000-0000-0000-0000-000000000000"
+    },
+    "sampling_rate_hz": 1,
+    "start_time": "2025-03-24T09:00:00Z",
+    "end_time": "2025-03-24T09:05:00Z",
+    "samples": [
+      {"timestamp": "2025-03-24T09:00:00Z", "spo2": 98.2, "confidence": 0.97},
+      {"timestamp": "2025-03-24T09:01:00Z", "spo2": 98.5, "confidence": 0.98},
+      {"timestamp": "2025-03-24T09:02:00Z", "spo2": 98.3, "confidence": 0.97},
+      {"timestamp": "2025-03-24T09:03:00Z", "spo2": 98.4, "confidence": 0.98},
+      {"timestamp": "2025-03-24T09:04:00Z", "spo2": 98.6, "confidence": 0.99},
+      {"timestamp": "2025-03-24T09:05:00Z", "spo2": 98.5, "confidence": 0.98}
+    ],
+    "metadata": {
+      "activity": "resting",
+      "position": "sitting",
+      "environment": "indoors",
+      "measurement_mode": "spot_check"
+    }
+  }

@@ -25,5 +25,7 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
             .service(health_data::get_acceleration_data)
             .service(health_data::upload_heart_rate)
             .service(health_data::get_heart_rate_data)
+            .service(health_data::upload_blood_oxygen)
+            .service(health_data::get_blood_oxygen_data)
     );
 }
