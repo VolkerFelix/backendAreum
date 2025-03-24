@@ -21,5 +21,3 @@ Cargo.lock
 #.idea/
 
 .env
-
-health_data
