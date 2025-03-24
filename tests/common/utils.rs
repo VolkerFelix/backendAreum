@@ -36,25 +36,6 @@ pub struct TestApp{
     pub db_name: String,
 }
 
-impl Drop for TestApp {
-    fn drop(&mut self) {
-        // Clean up the database when the test app is dropped
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        rt.block_on(async {
-            let mut connection = PgConnection::connect(
-                "postgres://postgres:postgres@localhost:5432/postgres"
-            )
-            .await
-            .expect("Failed to connect to Postgres");
-            
-            connection
-                .execute(format!(r#"DROP DATABASE IF EXISTS "{}";"#, self.db_name).as_str())
-                .await
-                .expect("Failed to drop database.");
-        });
-    }
-}
-
 pub async fn spawn_app() -> TestApp {
     // The first time `initialize` is invoked the code in `TRACING` is executed.
     // All other invocations will instead skip execution.
