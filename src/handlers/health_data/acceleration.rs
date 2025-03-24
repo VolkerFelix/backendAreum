@@ -1,3 +1,4 @@
+// src/handlers/health_data/acceleration.rs
 use actix_web::{web, HttpResponse};
 use chrono::Utc;
 use serde_json::json;
@@ -5,14 +6,13 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::middleware::auth::Claims;
-use crate::models::health_data::{AccelerationDataUpload, HealthDataResponse};
+use crate::models::health_data::{AccelerationDataUpload, HealthDataRecord, HealthDataResponse};
 
 #[tracing::instrument(
-    name = "Upload acceleration data",
+    name = "Uploading acceleration data",
     skip(data, pool, claims),
     fields(
-        username = %claims.username,
-        data_type = %data.data_type
+        user_id = %claims.sub
     )
 )]
 pub async fn upload_acceleration_data(
@@ -20,8 +20,9 @@ pub async fn upload_acceleration_data(
     pool: web::Data<PgPool>,
     claims: web::ReqData<Claims>
 ) -> HttpResponse {
-    // Validate data_type is correct
+    // Validate data_type
     if data.data_type != "acceleration" {
+        tracing::warn!("Invalid data type: {}", data.data_type);
         return HttpResponse::BadRequest().json(json!({
             "status": "error",
             "message": "Invalid data type. Expected 'acceleration'."
@@ -30,10 +31,11 @@ pub async fn upload_acceleration_data(
 
     let user_id = match Uuid::parse_str(&claims.sub) {
         Ok(id) => id,
-        Err(_) => {
+        Err(e) => {
+            tracing::error!("Failed to parse user_id as UUID: {:?}", e);
             return HttpResponse::InternalServerError().json(json!({
                 "status": "error",
-                "message": "Invalid user ID"
+                "message": "Invalid user ID format"
             }));
         }
     };
@@ -48,8 +50,35 @@ pub async fn upload_acceleration_data(
         data.start_time
     };
 
+    // Create JSON data payload
+    let data_json = match serde_json::to_value(json!({
+        "samples": &data.samples,
+        "metadata": &data.metadata
+    })) {
+        Ok(value) => value,
+        Err(e) => {
+            tracing::error!("Failed to serialize data to JSON: {:?}", e);
+            return HttpResponse::InternalServerError().json(json!({
+                "status": "error",
+                "message": "Failed to process acceleration data"
+            }));
+        }
+    };
+
+    // Create device info JSON
+    let device_info_json = match serde_json::to_value(&data.device_info) {
+        Ok(value) => value,
+        Err(e) => {
+            tracing::error!("Failed to serialize device info to JSON: {:?}", e);
+            return HttpResponse::InternalServerError().json(json!({
+                "status": "error",
+                "message": "Failed to process device information"
+            }));
+        }
+    };
+
     // Insert into database
-    match sqlx::query!(
+    let result = sqlx::query!(
         r#"
         INSERT INTO health_data (
             id, user_id, data_type, device_info, sampling_rate_hz, 
@@ -60,18 +89,17 @@ pub async fn upload_acceleration_data(
         id,
         user_id,
         data.data_type,
-        serde_json::to_value(&data.device_info).unwrap(),
+        device_info_json,
         data.sampling_rate_hz,
         data.start_time,
         end_time,
-        serde_json::to_value(&json!({
-            "samples": &data.samples,
-            "metadata": &data.metadata
-        })).unwrap(),
-        Utc::now()
+        data_json,
+        Utc::now(),
     )
     .execute(pool.get_ref())
-    .await {
+    .await;
+
+    match result {
         Ok(_) => {
             HttpResponse::Ok().json(HealthDataResponse {
                 id: id.to_string(),
@@ -90,10 +118,10 @@ pub async fn upload_acceleration_data(
 }
 
 #[tracing::instrument(
-    name = "Get acceleration data",
+    name = "Getting user acceleration data",
     skip(pool, claims),
     fields(
-        username = %claims.username,
+        user_id = %claims.sub
     )
 )]
 pub async fn get_user_acceleration_data(
@@ -102,16 +130,18 @@ pub async fn get_user_acceleration_data(
 ) -> HttpResponse {
     let user_id = match Uuid::parse_str(&claims.sub) {
         Ok(id) => id,
-        Err(_) => {
+        Err(e) => {
+            tracing::error!("Failed to parse user_id as UUID: {:?}", e);
             return HttpResponse::InternalServerError().json(json!({
                 "status": "error",
-                "message": "Invalid user ID"
+                "message": "Invalid user ID format"
             }));
         }
     };
     
     // Get all acceleration data for this user
-    match sqlx::query!(
+    let result = sqlx::query_as!(
+        HealthDataRecord,
         r#"
         SELECT 
             id, 
@@ -130,27 +160,14 @@ pub async fn get_user_acceleration_data(
         user_id
     )
     .fetch_all(pool.get_ref())
-    .await {
+    .await;
+
+    match result {
         Ok(records) => {
-            // Transform records into serializable format
-            let serializable_records: Vec<serde_json::Value> = records.iter().map(|record| {
-                json!({
-                    "id": record.id.to_string(),
-                    "user_id": record.user_id.to_string(),
-                    "data_type": &record.data_type,
-                    "device_info": &record.device_info,
-                    "sampling_rate_hz": record.sampling_rate_hz,
-                    "start_time": record.start_time,
-                    "end_time": record.end_time,
-                    "data": &record.data,
-                    "created_at": record.created_at
-                })
-            }).collect();
-            
             HttpResponse::Ok().json(json!({
                 "status": "success",
                 "count": records.len(),
-                "data": serializable_records
+                "data": records
             }))
         },
         Err(e) => {

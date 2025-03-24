@@ -83,6 +83,28 @@ pub struct BloodOxygenDataUpload {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SkinTemperatureSample {
+    pub timestamp: DateTime<Utc>,
+    pub temperature: f32,  // Temperature in Celsius
+    #[serde(default)]
+    pub confidence: Option<f64>,  // confidence score between 0 and 1
+    #[serde(default)]
+    pub body_location: Option<String>,  // Optional body location (e.g., "wrist", "forehead")
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct SkinTemperatureDataUpload {
+    pub data_type: String,
+    pub device_info: DeviceInfo,
+    pub sampling_rate_hz: i32,
+    pub start_time: DateTime<Utc>,
+    pub end_time: DateTime<Utc>,
+    pub samples: Vec<SkinTemperatureSample>,
+    #[serde(default)]
+    pub metadata: Option<serde_json::Value>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct HealthDataRecord {
     pub id: Uuid,
     pub user_id: Uuid,
@@ -90,6 +112,7 @@ pub struct HealthDataRecord {
     pub device_info: serde_json::Value,
     pub sampling_rate_hz: i32,
     pub start_time: DateTime<Utc>,
+    pub end_time: DateTime<Utc>,
     pub data: serde_json::Value,
     pub created_at: DateTime<Utc>,
 }

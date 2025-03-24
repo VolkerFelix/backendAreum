@@ -6,10 +6,17 @@ use crate::handlers::health_data::{
     heart_rate::upload_heart_rate_data, 
     heart_rate::get_user_heart_rate_data,
     blood_oxygen::upload_blood_oxygen_data,
-    blood_oxygen::get_user_blood_oxygen_data
+    blood_oxygen::get_user_blood_oxygen_data,
+    skin_temperature::upload_skin_temperature_data,
+    skin_temperature::get_user_skin_temperature_data
 };
 use crate::middleware::auth::Claims;
-use crate::models::health_data::{AccelerationDataUpload, HeartRateDataUpload, BloodOxygenDataUpload};
+use crate::models::health_data::{
+    AccelerationDataUpload, 
+    HeartRateDataUpload, 
+    BloodOxygenDataUpload,
+    SkinTemperatureDataUpload
+};
 
 #[post("/upload_acceleration")]
 async fn upload_acceleration(
@@ -60,4 +67,21 @@ async fn get_blood_oxygen_data(
     claims: web::ReqData<Claims>
 ) -> HttpResponse {
     get_user_blood_oxygen_data(pool, claims).await
+}
+
+#[post("/upload_skin_temperature")]
+async fn upload_skin_temperature(
+    data: web::Json<SkinTemperatureDataUpload>,
+    pool: web::Data<sqlx::PgPool>,
+    claims: web::ReqData<Claims>
+) -> HttpResponse {
+    upload_skin_temperature_data(data, pool, claims).await
+}
+
+#[get("/skin_temperature_data")]
+async fn get_skin_temperature_data(
+    pool: web::Data<sqlx::PgPool>,
+    claims: web::ReqData<Claims>
+) -> HttpResponse {
+    get_user_skin_temperature_data(pool, claims).await
 }
