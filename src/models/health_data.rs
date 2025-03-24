@@ -55,6 +55,7 @@ pub struct HeartRateDataUpload {
     pub device_info: DeviceInfo,
     pub sampling_rate_hz: i32,
     pub start_time: DateTime<Utc>,
+    pub end_time: DateTime<Utc>,
     pub samples: Vec<HeartRateSample>,
     #[serde(default)]
     pub metadata: Option<serde_json::Value>,
@@ -68,6 +69,7 @@ pub struct HealthDataRecord {
     pub device_info: serde_json::Value,
     pub sampling_rate_hz: i32,
     pub start_time: DateTime<Utc>,
+    pub end_time: DateTime<Utc>,  // Added end_time field
     pub data: serde_json::Value,
     pub created_at: DateTime<Utc>,
 }
