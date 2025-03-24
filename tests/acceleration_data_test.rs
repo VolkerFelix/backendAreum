@@ -6,7 +6,7 @@ mod common;
 use common::utils::spawn_app;
 
 #[tokio::test]
-async fn upload_health_data_returns_200_for_authenticated_user() {
+async fn upload_acceleration_data_returns_200_for_authenticated_user() {
     // Arrange
     let test_app = spawn_app().await;
     let client = Client::new();
@@ -61,11 +61,13 @@ async fn upload_health_data_returns_200_for_authenticated_user() {
         },
         "sampling_rate_hz": 50,
         "start_time": "2025-03-10T12:00:00Z",
+        "end_time": "2025-03-10T12:00:01Z",
         "samples": [
             {"timestamp": "2025-03-10T12:00:00.000Z", "x": 0.01, "y": 0.02, "z": 0.97},
             {"timestamp": "2025-03-10T12:00:00.020Z", "x": 0.02, "y": 0.03, "z": 0.98},
             {"timestamp": "2025-03-10T12:00:00.040Z", "x": 0.01, "y": 0.01, "z": 0.99}
-        ]
+        ],
+        "metadata": {}  // Add optional metadata if required
     });
 
     // Act - Upload acceleration data
@@ -134,7 +136,7 @@ async fn upload_health_data_returns_200_for_authenticated_user() {
 }
 
 #[tokio::test]
-async fn upload_health_data_returns_401_without_token() {
+async fn upload_acceleration_data_returns_401_without_token() {
     // Arrange
     let test_app = spawn_app().await;
     let client = Client::new();
