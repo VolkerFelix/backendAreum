@@ -23,5 +23,7 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
             .wrap(AuthMiddleware)
             .service(health_data::upload_acceleration)
             .service(health_data::get_acceleration_data)
+            .service(health_data::upload_heart_rate)
+            .service(health_data::get_heart_rate_data)
     );
 }
