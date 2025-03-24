@@ -32,7 +32,27 @@ static TRACING: Lazy<()> = Lazy::new(|| {
 
 pub struct TestApp{
     pub address: String,
-    pub db_pool: PgPool
+    pub db_pool: PgPool,
+    pub db_name: String,
+}
+
+impl Drop for TestApp {
+    fn drop(&mut self) {
+        // Clean up the database when the test app is dropped
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        rt.block_on(async {
+            let mut connection = PgConnection::connect(
+                "postgres://postgres:postgres@localhost:5432/postgres"
+            )
+            .await
+            .expect("Failed to connect to Postgres");
+            
+            connection
+                .execute(format!(r#"DROP DATABASE IF EXISTS "{}";"#, self.db_name).as_str())
+                .await
+                .expect("Failed to drop database.");
+        });
+    }
 }
 
 pub async fn spawn_app() -> TestApp {
@@ -46,7 +66,11 @@ pub async fn spawn_app() -> TestApp {
     let port = listener.local_addr().unwrap().port();
     let address = format!("http://127.0.0.1:{}", port);
     let mut configuration = get_config().expect("Failed to read configuration.");
-    configuration.database.db_name = Uuid::new_v4().to_string();
+    
+    // Generate a unique database name for this test
+    let db_name = format!("areum_test_{}", Uuid::new_v4());
+    configuration.database.db_name = db_name.clone();
+    
     let connection_pool = configure_db(&configuration.database)
         .await;
     let jwt_settings = get_jwt_settings(&configuration);
@@ -58,7 +82,8 @@ pub async fn spawn_app() -> TestApp {
     let _ = tokio::spawn(server);
     TestApp {
         address,
-        db_pool: connection_pool
+        db_pool: connection_pool,
+        db_name,
     }
 }
 
@@ -78,6 +103,8 @@ pub async fn configure_db(config: &DatabaseSettings) -> PgPool {
     let connection_pool = PgPool::connect(&config.connection_string().expose_secret())
         .await
         .expect("Failed to connect to Postgres.");
+    
+    // Run migrations
     sqlx::migrate!("./migrations")
         .run(&connection_pool)
         .await

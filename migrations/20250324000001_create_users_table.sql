@@ -1,4 +1,4 @@
--- Add migration script here
+-- Create users table
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY NOT NULL,
     username VARCHAR(255) UNIQUE NOT NULL,
@@ -6,4 +6,4 @@ CREATE TABLE IF NOT EXISTS users (
     email TEXT UNIQUE NOT NULL,
     created_at TIMESTAMPTZ NOT NULL,
     updated_at TIMESTAMPTZ NOT NULL
-);
+); 
