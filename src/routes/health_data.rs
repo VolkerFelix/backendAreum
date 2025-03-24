@@ -8,14 +8,19 @@ use crate::handlers::health_data::{
     blood_oxygen::upload_blood_oxygen_data,
     blood_oxygen::get_user_blood_oxygen_data,
     skin_temperature::upload_skin_temperature_data,
-    skin_temperature::get_user_skin_temperature_data
+    skin_temperature::get_user_skin_temperature_data,
+    gps_location::upload_gps_location_data,
+    gps_location::get_user_gps_location_data,
+    gps_location::get_health_data_with_gps
 };
 use crate::middleware::auth::Claims;
 use crate::models::health_data::{
     AccelerationDataUpload, 
     HeartRateDataUpload, 
     BloodOxygenDataUpload,
-    SkinTemperatureDataUpload
+    SkinTemperatureDataUpload,
+    GpsLocationDataUpload,
+    HealthDataTimeQuery
 };
 
 #[post("/upload_acceleration")]
@@ -84,4 +89,30 @@ async fn get_skin_temperature_data(
     claims: web::ReqData<Claims>
 ) -> HttpResponse {
     get_user_skin_temperature_data(pool, claims).await
+}
+
+#[post("/upload_gps_location")]
+async fn upload_gps_location(
+    data: web::Json<GpsLocationDataUpload>,
+    pool: web::Data<sqlx::PgPool>,
+    claims: web::ReqData<Claims>
+) -> HttpResponse {
+    upload_gps_location_data(data, pool, claims).await
+}
+
+#[get("/gps_location_data")]
+async fn get_gps_location_data(
+    pool: web::Data<sqlx::PgPool>,
+    claims: web::ReqData<Claims>
+) -> HttpResponse {
+    get_user_gps_location_data(pool, claims).await
+}
+
+#[get("/health_data_with_gps")]
+async fn get_health_with_gps(
+    pool: web::Data<sqlx::PgPool>,
+    claims: web::ReqData<Claims>,
+    params: web::Query<HealthDataTimeQuery>
+) -> HttpResponse {
+    get_health_data_with_gps(pool, claims, params).await
 }

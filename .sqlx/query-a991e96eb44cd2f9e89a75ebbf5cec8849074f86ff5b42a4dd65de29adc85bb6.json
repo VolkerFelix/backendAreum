@@ -1,0 +1,54 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT \n            id, \n            data_type, \n            start_time,\n            end_time,\n            data as \"data: serde_json::Value\", \n            created_at\n        FROM health_data \n        WHERE user_id = $1 \n          AND data_type = 'gps_location' \n          AND (\n            (start_time <= $2 AND end_time >= $2) OR\n            (start_time <= $3 AND end_time >= $3) OR\n            (start_time >= $2 AND end_time <= $3)\n          )\n        ORDER BY start_time ASC\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "data_type",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "start_time",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "end_time",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "data: serde_json::Value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "a991e96eb44cd2f9e89a75ebbf5cec8849074f86ff5b42a4dd65de29adc85bb6"
+}

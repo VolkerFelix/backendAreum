@@ -105,6 +105,29 @@ pub struct SkinTemperatureDataUpload {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct GpsLocationSample {
+    pub timestamp: DateTime<Utc>,
+    pub latitude: f64,
+    pub longitude: f64,
+    pub altitude: Option<f64>,
+    pub accuracy: Option<f64>,
+    pub speed: Option<f64>,
+    pub bearing: Option<f64>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GpsLocationDataUpload {
+    pub data_type: String,
+    pub device_info: DeviceInfo,
+    pub sampling_rate_hz: i32,
+    pub start_time: DateTime<Utc>,
+    pub end_time: DateTime<Utc>,
+    pub samples: Vec<GpsLocationSample>,
+    #[serde(default)]
+    pub metadata: Option<serde_json::Value>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct HealthDataRecord {
     pub id: Uuid,
     pub user_id: Uuid,
@@ -124,3 +147,9 @@ pub struct HealthDataResponse {
     pub message: Option<String>,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct HealthDataTimeQuery {
+    pub data_type: String,
+    pub start_time: DateTime<Utc>,
+    pub end_time: DateTime<Utc>,
+}
