@@ -53,5 +53,6 @@ DATABASE_URL=postgres://${POSTGRES__DATABASE__USER}:${POSTGRES__DATABASE__PASSWO
 export DATABASE_URL
 sqlx database create
 sqlx migrate run
+cargo sqlx prepare --database-url $DATABASE_URL
 
 >&2 echo "Postgres has been migrated, ready to go!"

@@ -30,6 +30,14 @@ pub struct AccelerationSample {
     pub z: f64,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct HeartRateSample {
+    pub timestamp: DateTime<Utc>,
+    pub heart_rate: i32,  // beats per minute
+    #[serde(default)]
+    pub confidence: Option<f64>,  // confidence score between 0 and 1
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AccelerationDataUpload {
     pub data_type: String,
@@ -37,6 +45,17 @@ pub struct AccelerationDataUpload {
     pub sampling_rate_hz: i32,
     pub start_time: DateTime<Utc>,
     pub samples: Vec<AccelerationSample>,
+    #[serde(default)]
+    pub metadata: Option<serde_json::Value>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct HeartRateDataUpload {
+    pub data_type: String,
+    pub device_info: DeviceInfo,
+    pub sampling_rate_hz: i32,
+    pub start_time: DateTime<Utc>,
+    pub samples: Vec<HeartRateSample>,
     #[serde(default)]
     pub metadata: Option<serde_json::Value>,
 }

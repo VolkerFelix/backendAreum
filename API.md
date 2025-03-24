@@ -85,6 +85,40 @@ Authorization: Bearer <your_jwt_token>
   }
   ```
 
+#### Upload Heart Rate Data
+- **Endpoint**: `POST /health/upload_heart_rate`
+- **Authentication**: Required
+- **Request Body**:
+  ```json
+  {
+    "data_type": "heart_rate",
+    "device_info": {
+      "device_type": "string",
+      "model": "string",
+      "os_version": "string",
+      "device_id": "string" (optional)
+    },
+    "sampling_rate_hz": number,
+    "start_time": "ISO 8601 datetime",
+    "samples": [
+      {
+        "timestamp": "ISO 8601 datetime",
+        "heart_rate": number,
+        "confidence": number (optional)
+      }
+    ],
+    "metadata": {} (optional)
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "id": "string",
+    "status": "success",
+    "message": "Heart rate data uploaded successfully"
+  }
+  ```
+
 #### Get Acceleration Data
 - **Endpoint**: `GET /health/acceleration_data`
 - **Authentication**: Required
@@ -107,6 +141,41 @@ Authorization: Bearer <your_jwt_token>
         "start_time": "ISO 8601 datetime",
         "data": {
           "samples": [...]
+        },
+        "created_at": "ISO 8601 datetime"
+      }
+    ]
+  }
+  ```
+
+#### Get Heart Rate Data
+- **Endpoint**: `GET /health/heart_rate_data`
+- **Authentication**: Required
+- **Response**:
+  ```json
+  {
+    "status": "success",
+    "count": number,
+    "data": [
+      {
+        "id": "string",
+        "data_type": "heart_rate",
+        "device_info": {
+          "device_type": "string",
+          "model": "string",
+          "os_version": "string",
+          "device_id": "string"
+        },
+        "sampling_rate_hz": number,
+        "start_time": "ISO 8601 datetime",
+        "data": {
+          "samples": [
+            {
+              "timestamp": "ISO 8601 datetime",
+              "heart_rate": number,
+              "confidence": number
+            }
+          ]
         },
         "created_at": "ISO 8601 datetime"
       }
@@ -173,5 +242,13 @@ Device information includes:
 Acceleration data is stored with:
 - Three-axis measurements (x, y, z)
 - Timestamps for each measurement
+- Sampling rate in Hz
+- Optional metadata for additional context
+
+### Heart Rate Data
+Heart rate data is stored with:
+- Heart rate measurements in beats per minute
+- Timestamps for each measurement
+- Optional confidence score (0-1) for each measurement
 - Sampling rate in Hz
 - Optional metadata for additional context 
