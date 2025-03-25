@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO onboarding_progress (\n            id, user_id, basic_info_completed, lifestyle_health_completed,\n            permissions_setup_completed, personalization_completed, \n            onboarding_completed, current_step, created_at, updated_at\n        )\n        VALUES ($1, $2, false, false, false, false, false, 'basic_info', $3, $3)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "54de4aade8381e4b4e5ae08f52ec197dde809caa4f7cb8abf1080bd53a53a603"
+}

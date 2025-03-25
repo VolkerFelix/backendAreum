@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE onboarding_progress\n        SET \n            lifestyle_health_completed = true,\n            current_step = CASE WHEN current_step = 'lifestyle_health' THEN 'permissions_setup' ELSE current_step END,\n            updated_at = $1\n        WHERE user_id = $2\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Timestamptz",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c2d724b94dd84468e2555cedc60ca7e0adf262fad9fccde9dba5e4afe8685c11"
+}

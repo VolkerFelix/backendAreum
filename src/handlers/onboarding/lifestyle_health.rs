@@ -8,28 +8,35 @@ use crate::middleware::auth::Claims;
 use crate::models::onboarding::{
     ApiResponse, LifestyleHealthRequest, LifestyleHealthResponse
 };
-use super::status::get_or_create_onboarding_progress;
+use crate::models::onboarding::{MedicalConditionType, LifestyleInfo};
 
-// Continuation of the submit_lifestyle_health function
 pub async fn submit_lifestyle_health(
     data: web::Json<LifestyleHealthRequest>,
     pool: web::Data<PgPool>,
     claims: web::ReqData<Claims>,
 ) -> HttpResponse {
-    // Previous code for parsing and validating input goes here...
-    // (The code from the previous artifact continues here)
-    
-    // Continue with medical conditions processing
-    // Clear existing medical conditions for the user
-    match sqlx::query!(
+    let user_id = match Uuid::parse_str(&claims.sub) {
+        Ok(id) => id,
+        Err(e) => {
+            tracing::error!("Failed to parse user_id as UUID: {:?}", e);
+            return HttpResponse::InternalServerError().json(json!({
+                "status": "error",
+                "message": "Invalid user ID format"
+            }));
+        }
+    };
+
+    let result = sqlx::query!(
         r#"
         DELETE FROM user_medical_conditions
         WHERE user_id = $1
         "#,
         user_id
     )
-    .execute(&mut *tx)
-    .await {
+    .execute(pool.get_ref())
+    .await;
+    
+    match result {
         Ok(_) => (),
         Err(e) => {
             tracing::error!("Failed to clear existing medical conditions: {:?}", e);
@@ -44,15 +51,18 @@ pub async fn submit_lifestyle_health(
     // Process medical conditions
     for condition_name in &data.medical_conditions {
         // Get condition_id for the condition name
-        let condition = match sqlx::query!(
+        let result = sqlx::query_as!(
+            MedicalConditionType,
             r#"
-            SELECT id FROM medical_condition_types
+            SELECT id, name, description, created_at FROM medical_condition_types
             WHERE name = $1
             "#,
             condition_name
         )
-        .fetch_optional(&mut *tx)
-        .await {
+        .fetch_optional(pool.get_ref())
+        .await;
+
+        match result {
             Ok(Some(record)) => record,
             Ok(None) => {
                 tracing::warn!("Medical condition type not found: {}", condition_name);
@@ -167,26 +177,23 @@ pub async fn get_lifestyle_health(
     };
 
     // Get lifestyle info
-    let lifestyle = match sqlx::query!(
+    let result = sqlx::query_as!(
+        LifestyleInfo,
         r#"
         SELECT 
             activity_level, bedtime, wake_time,
-            is_smoker, alcohol_consumption, tracks_menstrual_cycle
+            is_smoker, alcohol_consumption, tracks_menstrual_cycle, 
+            created_at, id, menstrual_cycle_data, updated_at
         FROM lifestyle_info
         WHERE user_id = $1
         "#,
         user_id
     )
-    .fetch_optional(&**pool)
-    .await {
-        Ok(Some(record)) => record,
-        Ok(None) => {
-            return HttpResponse::NotFound().json(ApiResponse {
-                status: "error".to_string(),
-                message: Some("Lifestyle info not found".to_string()),
-                data: None::<()>,
-            });
-        },
+    .fetch_all(pool.get_ref())
+    .await;
+
+    let lifestyle = match result {
+        Ok(records) => records,
         Err(e) => {
             tracing::error!("Failed to get lifestyle info: {:?}", e);
             return HttpResponse::InternalServerError().json(ApiResponse {
@@ -197,19 +204,21 @@ pub async fn get_lifestyle_health(
         }
     };
 
-    // Get medical conditions
-    let conditions = match sqlx::query!(
+    let result = sqlx::query_as!(
+        MedicalConditionType,
         r#"
-        SELECT mct.name
+        SELECT mct.name, mct.id, mct.created_at, mct.description
         FROM user_medical_conditions umc
         JOIN medical_condition_types mct ON umc.condition_id = mct.id
         WHERE umc.user_id = $1
         "#,
         user_id
     )
-    .fetch_all(&**pool)
-    .await {
-        Ok(records) => records.into_iter().map(|r| r.name).collect::<Vec<String>>(),
+    .fetch_all(pool.get_ref())
+    .await;
+
+    let conditions = match result {
+        Ok(records) => records,
         Err(e) => {
             tracing::error!("Failed to get medical conditions: {:?}", e);
             return HttpResponse::InternalServerError().json(ApiResponse {

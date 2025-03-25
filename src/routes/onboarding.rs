@@ -1,4 +1,6 @@
 use actix_web::{get, post, web, HttpResponse};
+use sqlx::PgPool;
+
 
 use crate::middleware::auth::Claims;
 use crate::models::onboarding::{
@@ -19,7 +21,7 @@ use crate::handlers::onboarding::{
 // Onboarding status endpoint
 #[get("/status")]
 pub async fn onboarding_status(
-    pool: web::Data<sqlx::PgPool>,
+    pool: web::Data<PgPool>,
     claims: web::ReqData<Claims>
 ) -> HttpResponse {
     status::get_onboarding_status(pool, claims).await
@@ -29,7 +31,7 @@ pub async fn onboarding_status(
 #[post("/basic_info")]
 pub async fn submit_basic_info(
     data: web::Json<BasicInfoRequest>,
-    pool: web::Data<sqlx::PgPool>,
+    pool: web::Data<PgPool>,
     claims: web::ReqData<Claims>
 ) -> HttpResponse {
     basic_info::submit_basic_info(data, pool, claims).await
@@ -38,7 +40,7 @@ pub async fn submit_basic_info(
 // Get basic info endpoint
 #[get("/basic_info")]
 pub async fn get_basic_info(
-    pool: web::Data<sqlx::PgPool>,
+    pool: web::Data<PgPool>,
     claims: web::ReqData<Claims>
 ) -> HttpResponse {
     basic_info::get_basic_info(pool, claims).await
@@ -48,7 +50,7 @@ pub async fn get_basic_info(
 #[post("/lifestyle_health")]
 pub async fn submit_lifestyle_health(
     data: web::Json<LifestyleHealthRequest>,
-    pool: web::Data<sqlx::PgPool>,
+    pool: web::Data<PgPool>,
     claims: web::ReqData<Claims>
 ) -> HttpResponse {
     lifestyle_health::submit_lifestyle_health(data, pool, claims).await

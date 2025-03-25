@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT \n            display_name, date_of_birth, biological_sex,\n            height_cm, weight_kg\n        FROM user_profiles\n        WHERE user_id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "display_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "date_of_birth",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 2,
+        "name": "biological_sex",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "height_cm",
+        "type_info": "Numeric"
+      },
+      {
+        "ordinal": 4,
+        "name": "weight_kg",
+        "type_info": "Numeric"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "94ff80c74f2d2a20519cc6012dca6067fa19ccc6b2bcc3ef74df88275944ca0a"
+}

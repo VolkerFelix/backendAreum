@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                UPDATE user_third_party_connections\n                SET \n                    connection_status = 'pending',\n                    connection_data = $1,\n                    updated_at = $2\n                WHERE id = $3\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Jsonb",
+        "Timestamptz",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "da1b3b3a2fdd2e381a47db203e067788c1cc1dfd79296eb0e7b43c2ec47d2cc8"
+}
