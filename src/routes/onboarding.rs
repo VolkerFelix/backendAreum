@@ -31,8 +31,8 @@ pub async fn submit_basic_info(
     data: web::Json<BasicInfoRequest>,
     pool: web::Data<sqlx::PgPool>,
     claims: web::ReqData<Claims>
-) -> impl actix_web::Responder {
-    super::submit_basic_info(data, pool, claims).await
+) -> HttpResponse {
+    basic_info::submit_basic_info(data, pool, claims).await
 }
 
 // Get basic info endpoint
@@ -40,8 +40,8 @@ pub async fn submit_basic_info(
 pub async fn get_basic_info(
     pool: web::Data<sqlx::PgPool>,
     claims: web::ReqData<Claims>
-) -> impl actix_web::Responder {
-    super::get_basic_info(pool, claims).await
+) -> HttpResponse {
+    basic_info::get_basic_info(pool, claims).await
 }
 
 // Lifestyle and health submission endpoint
@@ -50,8 +50,8 @@ pub async fn submit_lifestyle_health(
     data: web::Json<LifestyleHealthRequest>,
     pool: web::Data<sqlx::PgPool>,
     claims: web::ReqData<Claims>
-) -> impl actix_web::Responder {
-    super::submit_lifestyle_health(data, pool, claims).await
+) -> HttpResponse {
+    lifestyle_health::submit_lifestyle_health(data, pool, claims).await
 }
 
 // Get lifestyle health endpoint
@@ -59,8 +59,8 @@ pub async fn submit_lifestyle_health(
 pub async fn get_lifestyle_health(
     pool: web::Data<sqlx::PgPool>,
     claims: web::ReqData<Claims>
-) -> impl actix_web::Responder {
-    super::get_lifestyle_health(pool, claims).await
+) -> HttpResponse {
+    lifestyle_health::get_lifestyle_health(pool, claims).await
 }
 
 // Permissions setup submission endpoint
@@ -69,8 +69,8 @@ pub async fn submit_permissions_setup(
     data: web::Json<PermissionsSetupRequest>,
     pool: web::Data<sqlx::PgPool>,
     claims: web::ReqData<Claims>
-) -> impl actix_web::Responder {
-    super::submit_permissions_setup(data, pool, claims).await
+) -> HttpResponse {
+    permissions::submit_permissions_setup(data, pool, claims).await
 }
 
 // Get permissions setup endpoint
@@ -78,8 +78,8 @@ pub async fn submit_permissions_setup(
 pub async fn get_permissions_setup(
     pool: web::Data<sqlx::PgPool>,
     claims: web::ReqData<Claims>
-) -> impl actix_web::Responder {
-    super::get_permissions_setup(pool, claims).await
+) -> HttpResponse {
+    permissions::get_permissions_setup(pool, claims).await
 }
 
 // Personalization submission endpoint
@@ -88,8 +88,8 @@ pub async fn submit_personalization(
     data: web::Json<PersonalizationRequest>,
     pool: web::Data<sqlx::PgPool>,
     claims: web::ReqData<Claims>
-) -> impl actix_web::Responder {
-    super::submit_personalization(data, pool, claims).await
+) -> HttpResponse {
+    personalization::submit_personalization(data, pool, claims).await
 }
 
 // Get personalization endpoint
@@ -97,22 +97,6 @@ pub async fn submit_personalization(
 pub async fn get_personalization(
     pool: web::Data<sqlx::PgPool>,
     claims: web::ReqData<Claims>
-) -> impl actix_web::Responder {
-    super::get_personalization(pool, claims).await
-}
-
-// Configuration function to add onboarding routes to the service
-pub fn init_onboarding_routes(cfg: &mut web::ServiceConfig) {
-    cfg.service(
-        web::scope("/onboarding")
-            .service(onboarding_status)
-            .service(submit_basic_info)
-            .service(get_basic_info)
-            .service(submit_lifestyle_health)
-            .service(get_lifestyle_health)
-            .service(submit_permissions_setup)
-            .service(get_permissions_setup)
-            .service(submit_personalization)
-            .service(get_personalization)
-    );
+) -> HttpResponse {
+    personalization::get_personalization(pool, claims).await
 }
