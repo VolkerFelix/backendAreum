@@ -64,7 +64,6 @@ pub struct ProcessedSleepData {
     pub start_time: DateTime<Utc>,
     pub end_time: DateTime<Utc>,
     pub samples: Vec<SleepStageSample>,
-    #[serde(rename = "sleep_metrics")]
     pub sleep_metrics: SleepMetrics,
     pub sleep_score: i32,  // 0-100 score
     pub created_at: DateTime<Utc>,
