@@ -1,8 +1,8 @@
 // tests/migration_test.rs
-use sqlx::PgPool;
 use uuid::Uuid;
-use chrono::Utc;
+use chrono::{NaiveDate, Utc};
 use serde_json::json;
+use sqlx::{PgPool, Row};
 
 mod common;
 use common::utils::spawn_app;
@@ -15,10 +15,33 @@ async fn processed_sleep_data_table_exists_and_works() {
     // Act & Assert - Verify we can insert and query data in the processed_sleep_data table
     
     // Generate test data
+    // First create a real test user that we can reference
     let test_id = Uuid::new_v4();
-    let user_id = Uuid::new_v4(); // Fake user ID for testing
+    let username = format!("testuser{}", Uuid::new_v4());
+    let email = format!("{}@example.com", username);
+        
+    // Insert a real user that we can reference with foreign key
+    let user_id = sqlx::query!(
+        r#"
+        INSERT INTO users (id, username, password_hash, email, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING id
+        "#,
+        Uuid::new_v4(),
+        username,
+        "fake_password_hash",
+        email,
+        Utc::now(),
+        Utc::now()
+    )
+    .fetch_one(&test_app.db_pool)
+    .await
+    .expect("Failed to create test user")
+    .id;
+
     let data_type = "sleep_test";
-    let night_date = "2025-03-24";
+    let night_date = NaiveDate::parse_from_str("2025-03-24", "%Y-%m-%d")
+        .expect("Failed to parse date");
     let created_at = Utc::now();
     
     let test_data = json!({
@@ -69,15 +92,15 @@ async fn processed_sleep_data_table_exists_and_works() {
     assert_eq!(record.data["value"], json!("migration test"));
     
     // Test the indexes
-    let explain_result = sqlx::query!(
+    let explain_result = sqlx::query(
         r#"
         EXPLAIN ANALYZE
         SELECT * FROM processed_sleep_data 
         WHERE user_id = $1 AND night_date = $2
-        "#,
-        user_id,
-        night_date
+        "#
     )
+    .bind(user_id)
+    .bind(night_date)
     .fetch_all(&test_app.db_pool)
     .await;
     
@@ -86,7 +109,7 @@ async fn processed_sleep_data_table_exists_and_works() {
     // Convert explain result to string to check if index is used
     let explain_output = explain_result.unwrap()
         .iter()
-        .map(|row| row.plan.clone().unwrap_or_default())
+        .map(|row| row.try_get::<String, _>(0).unwrap_or_default())
         .collect::<Vec<String>>()
         .join("\n");
     
@@ -108,7 +131,8 @@ async fn processed_sleep_data_enforces_foreign_key_constraint() {
     let test_id = Uuid::new_v4();
     let fake_user_id = Uuid::new_v4(); // Non-existent user ID
     let data_type = "sleep_test";
-    let night_date = "2025-03-24";
+    let night_date = NaiveDate::parse_from_str("2025-03-24", "%Y-%m-%d")
+        .expect("Failed to parse date");
     let created_at = Utc::now();
     
     let test_data = json!({
@@ -174,7 +198,8 @@ async fn processed_sleep_data_table_preserves_jsonb_data() {
     
     // Create complex nested JSON data
     let test_id = Uuid::new_v4();
-    let night_date = "2025-03-24";
+    let night_date = NaiveDate::parse_from_str("2025-03-24", "%Y-%m-%d")
+        .expect("Failed to parse date");
     let created_at = Utc::now();
     
     let complex_json = json!({
