@@ -6,7 +6,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::middleware::auth::Claims;
-use crate::models::health_data::{SkinTemperatureDataUpload, HealthDataResponse};
+use crate::models::sensor_data::{SkinTemperatureDataUpload, HealthDataResponse};
 
 #[tracing::instrument(
     name = "Upload skin temperature data",
