@@ -24,10 +24,7 @@ pub async fn get_sleep_data_by_date(
     tracing::info!("Sleep data retrieval handler called for date: {}", query.date);
     
     let user_id = match Uuid::parse_str(&claims.sub) {
-        Ok(id) => {
-            tracing::info!("User ID parsed successfully: {}", id);
-            id
-        },
+        Ok(id) => id,
         Err(e) => {
             tracing::error!("Failed to parse user ID: {}", e);
             return HttpResponse::InternalServerError().json(json!({
@@ -50,7 +47,6 @@ pub async fn get_sleep_data_by_date(
     
     tracing::info!("Beginning database query for processed sleep data");
     
-    // Query to get processed sleep data for the specific date
     match sqlx::query!(
         r#"
         SELECT 
@@ -72,22 +68,69 @@ pub async fn get_sleep_data_by_date(
         Ok(Some(record)) => {
             tracing::info!("Successfully retrieved sleep data for date: {}", query.date);
             
-            // Parse the data into our ProcessedSleepData struct
-            let processed_sleep_data = match serde_json::from_value::<ProcessedSleepData>(record.data.clone()) {
-                Ok(data) => data,
+            // Detailed JSON handling with full error tracing
+            let raw_json_str = serde_json::to_string_pretty(&record.data)
+                .unwrap_or_else(|_| "Failed to serialize JSON".to_string());
+            
+            tracing::info!("Raw JSON data: {}", raw_json_str);
+            
+            // Attempt to manually parse the JSON to provide more insights
+            let raw_json: serde_json::Value = match serde_json::from_value(record.data.clone()) {
+                Ok(json) => json,
                 Err(e) => {
-                    tracing::error!("Failed to parse processed sleep data: {:?}", e);
+                    tracing::error!("Initial JSON parsing error: {:?}", e);
                     return HttpResponse::InternalServerError().json(json!({
                         "status": "error",
-                        "message": "Failed to parse processed sleep data"
+                        "message": format!("Initial JSON parsing failed: {}", e)
                     }));
                 }
             };
             
-            HttpResponse::Ok().json(json!({
-                "status": "success",
-                "data": processed_sleep_data
-            }))
+            // Manual field validation
+            tracing::info!("Checking required fields");
+            
+            // Check for all required fields
+            let required_fields = vec![
+                "id", "user_id", "night_date", "start_time", "end_time", 
+                "samples", "sleep_metrics", "sleep_score", "created_at"
+            ];
+            
+            for field in required_fields {
+                if !raw_json.get(field).is_some() {
+                    tracing::error!("Missing required field: {}", field);
+                    return HttpResponse::InternalServerError().json(json!({
+                        "status": "error",
+                        "message": format!("Missing required field: {}", field)
+                    }));
+                }
+            }
+            
+            // Attempt to parse with explicit error handling
+            match serde_json::from_value::<ProcessedSleepData>(record.data.clone()) {
+                Ok(processed_data) => {
+                    tracing::info!("Successfully parsed processed sleep data");
+                    HttpResponse::Ok().json(json!({
+                        "status": "success",
+                        "data": processed_data
+                    }))
+                },
+                Err(e) => {
+                    tracing::error!("Serde parsing error: {:?}", e);
+                    
+                    // Attempt to print out specific problematic fields
+                    if let serde_json::Value::Object(obj) = &raw_json {
+                        for (key, value) in obj {
+                            tracing::error!("Field '{}': {}", key, 
+                                serde_json::to_string_pretty(value).unwrap_or_default());
+                        }
+                    }
+                    
+                    HttpResponse::InternalServerError().json(json!({
+                        "status": "error",
+                        "message": format!("Failed to parse processed sleep data: {}", e)
+                    }))
+                }
+            }
         },
         Ok(None) => {
             tracing::info!("No sleep data found for date: {}", query.date);

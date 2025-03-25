@@ -204,7 +204,7 @@ async fn processed_sleep_data_table_preserves_jsonb_data() {
     
     let complex_json = json!({
         "sleep_score": 85,
-        "metrics": {
+        "sleep_metrics": {
             "sleep_efficiency": 92.5,
             "sleep_latency_seconds": 600,
             "time_in_bed_seconds": 29700,
@@ -270,7 +270,7 @@ async fn processed_sleep_data_table_preserves_jsonb_data() {
     
     // Verify all parts of the complex JSON are preserved
     assert_eq!(record.data["sleep_score"], 85);
-    assert_eq!(record.data["metrics"]["sleep_efficiency"], 92.5);
+    assert_eq!(record.data["sleep_metrics"]["sleep_efficiency"], 92.5);
     assert_eq!(record.data["stage_distribution"]["deep"], 24.2);
     assert!(record.data["samples"].is_array());
     assert_eq!(record.data["samples"][0]["stage"], "awake");

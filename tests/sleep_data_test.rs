@@ -80,38 +80,43 @@ async fn get_sleep_data_returns_200_when_data_exists() {
     let test_app = spawn_app().await;
     let client = Client::new();
 
-    // Register and login a user
+    // Register and login a user first
     let username = format!("sleeptestuser{}", Uuid::new_v4());
     let password = "password123";
     let email = format!("{}@example.com", username);
 
     // Register user
+    let user_request = json!({
+        "username": username,
+        "password": password,
+        "email": email
+    });
+
     let register_response = client
         .post(&format!("{}/register_user", &test_app.address))
-        .json(&json!({
-            "username": username,
-            "password": password,
-            "email": email
-        }))
+        .json(&user_request)
         .send()
         .await
         .expect("Failed to execute registration request.");
 
-    assert_eq!(200, register_response.status().as_u16());
+    assert_eq!(200, register_response.status().as_u16(), "Registration should succeed");
 
     // Login to get a token
+    let login_request = json!({
+        "username": username,
+        "password": password
+    });
+
     let login_response = client
         .post(&format!("{}/login", &test_app.address))
-        .json(&json!({
-            "username": username,
-            "password": password
-        }))
+        .json(&login_request)
         .send()
         .await
         .expect("Failed to execute login request.");
 
-    let login_json = login_response.json::<serde_json::Value>().await.unwrap();
-    let token = login_json["token"].as_str().unwrap();
+    let login_json = login_response.json::<serde_json::Value>().await
+        .expect("Failed to parse login response as JSON");
+    let token = login_json["token"].as_str().expect("Token not found in response");
 
     // Get the user's UUID to insert test data
     let user = sqlx::query!(
@@ -131,22 +136,22 @@ async fn get_sleep_data_returns_200_when_data_exists() {
     let sleep_start = now - Duration::hours(8);
     let sleep_end = now - Duration::hours(1);
     
-    // Create test data
+    // Create test data with explicit field types matching ProcessedSleepData
     let test_data = json!({
         "id": sleep_data_id.to_string(),
         "user_id": user.id.to_string(),
         "night_date": test_date,
-        "start_time": sleep_start.to_rfc3339(),
-        "end_time": sleep_end.to_rfc3339(),
+        "start_time": sleep_start,
+        "end_time": sleep_end,
         "samples": [
             {
-                "timestamp": sleep_start.to_rfc3339(),
-                "stage": "awake",
+                "timestamp": sleep_start,
+                "stage": "Awake",
                 "confidence": 0.95,
                 "duration_seconds": 600
             }
         ],
-        "metrics": {
+        "sleep_metrics": {
             "sleep_efficiency": 92.5,
             "sleep_latency_seconds": 600,
             "total_sleep_seconds": 27500,
@@ -155,16 +160,14 @@ async fn get_sleep_data_returns_200_when_data_exists() {
             "rem_sleep_seconds": 5900,
             "awake_seconds": 2200
         },
-        "sleep_score": 85
+        "sleep_score": 85,
+        "created_at": now
     });
     
-    // Print the test data to see what we're inserting
-    eprintln!("Test data: {}", serde_json::to_string_pretty(&test_data).unwrap());
-    
-    // Insert test data into the database
-    let parsed_date = NaiveDate::parse_from_str(test_date, "%Y-%m-%d")
-        .expect("Failed to parse date");
-    
+    // Print the test data to help with debugging
+    println!("Test data: {}", serde_json::to_string_pretty(&test_data).unwrap());
+
+    // Modify the direct database insert to specify the correct data type
     let insert_result = sqlx::query!(
         r#"
         INSERT INTO processed_sleep_data
@@ -173,19 +176,18 @@ async fn get_sleep_data_returns_200_when_data_exists() {
         "#,
         sleep_data_id,
         user.id,
-        "sleep_stages",
-        parsed_date,
+        "sleep_stages", // Explicitly set the data type
+        night_date,
         test_data,
-        Utc::now()
+        now
     )
     .execute(&test_app.db_pool)
     .await;
-    
-    // Verify insert succeeded and print any error
-    match &insert_result {
-        Ok(_) => eprintln!("Successfully inserted test data"),
-        Err(e) => eprintln!("Failed to insert test data: {:?}", e)
-    };
+
+    // Print any database insert errors
+    if let Err(e) = &insert_result {
+        println!("Database insert error: {:?}", e);
+    }
     
     assert!(insert_result.is_ok(), "Failed to insert test sleep data");
     
@@ -202,9 +204,9 @@ async fn get_sleep_data_returns_200_when_data_exists() {
     .await;
     
     match &db_check {
-        Ok(Some(_)) => eprintln!("Successfully verified data exists in database"),
-        Ok(None) => eprintln!("Data not found in database after insert!"),
-        Err(e) => eprintln!("Error checking for data: {:?}", e)
+        Ok(Some(_)) => println!("Successfully verified data exists in database"),
+        Ok(None) => println!("Data not found in database after insert!"),
+        Err(e) => println!("Error checking for data: {:?}", e)
     };
     
     // Now call the API endpoint
@@ -219,13 +221,13 @@ async fn get_sleep_data_returns_200_when_data_exists() {
     if get_response.status() != 200 {
         let status = get_response.status();
         let error_text = get_response.text().await.unwrap_or_default();
-        eprintln!("API Error: Status {}, Body: {}", status, error_text);
+        println!("API Error: Status {}, Body: {}", status, error_text);
         assert_eq!(200, status.as_u16(), "Should return 200 OK when sleep data exists");
     } else {
         // Print successful response for debugging
         let response_body = get_response.json::<serde_json::Value>().await
             .expect("Failed to parse response as JSON");
-        eprintln!("Successful response: {}", serde_json::to_string_pretty(&response_body).unwrap());
+        println!("Successful response: {}", serde_json::to_string_pretty(&response_body).unwrap());
         
         assert_eq!(response_body["status"], "success", "Response status should be 'success'");
         assert!(response_body["data"].is_object(), "Response should include data object");

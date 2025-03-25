@@ -1,17 +1,19 @@
+use std::fmt;
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SleepStage {
-    #[serde(rename = "awake")]
+    #[serde(rename = "Awake")]
     Awake,
-    #[serde(rename = "light")]
+    #[serde(rename = "Light")]
     Light,
-    #[serde(rename = "deep")]
+    #[serde(rename = "Deep")]
     Deep,
-    #[serde(rename = "rem")]
+    #[serde(rename = "REM")]
     REM,
-    #[serde(rename = "unknown")]
+    #[serde(rename = "Unknown")]
     Unknown,
 }
 
@@ -62,9 +64,37 @@ pub struct ProcessedSleepData {
     pub start_time: DateTime<Utc>,
     pub end_time: DateTime<Utc>,
     pub samples: Vec<SleepStageSample>,
-    pub metrics: SleepMetrics,
+    #[serde(rename = "sleep_metrics")]
+    pub sleep_metrics: SleepMetrics,
     pub sleep_score: i32,  // 0-100 score
     pub created_at: DateTime<Utc>,
+}
+
+// Implement custom Debug for better error tracing
+impl fmt::Display for ProcessedSleepData {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "ProcessedSleepData {{ 
+            id: {}, 
+            user_id: {}, 
+            night_date: {}, 
+            start_time: {}, 
+            end_time: {}, 
+            samples: {} items, 
+            sleep_metrics: {:?}, 
+            sleep_score: {}, 
+            created_at: {} 
+        }}", 
+            self.id, 
+            self.user_id, 
+            self.night_date, 
+            self.start_time, 
+            self.end_time, 
+            self.samples.len(), 
+            self.sleep_metrics, 
+            self.sleep_score, 
+            self.created_at
+        )
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
