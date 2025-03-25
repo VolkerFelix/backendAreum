@@ -5,6 +5,7 @@ pub mod backend_health;
 pub mod auth;
 pub mod protected;
 pub mod health_data;
+pub mod onboarding;
 
 use crate::middleware::auth::AuthMiddleware;
 
