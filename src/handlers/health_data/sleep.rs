@@ -37,14 +37,16 @@ pub async fn get_sleep_data_by_date(
         }
     };
     
-    // Validate date format
-    if let Err(_) = NaiveDate::parse_from_str(&query.date, "%Y-%m-%d") {
-        tracing::warn!("Invalid date format provided: {}", query.date);
-        return HttpResponse::BadRequest().json(json!({
-            "status": "error",
-            "message": "Invalid date format. Expected YYYY-MM-DD."
-        }));
-    }
+    let date = match NaiveDate::parse_from_str(&query.date, "%Y-%m-%d") {
+        Ok(date) => date,
+        Err(_) => {
+            tracing::warn!("Invalid date format provided: {}", query.date);
+            return HttpResponse::BadRequest().json(json!({
+                "status": "error",
+                "message": "Invalid date format. Expected YYYY-MM-DD."
+            }));
+        }
+    };
     
     tracing::info!("Beginning database query for processed sleep data");
     
@@ -63,7 +65,7 @@ pub async fn get_sleep_data_by_date(
         LIMIT 1
         "#,
         user_id,
-        query.date
+        date
     )
     .fetch_optional(pool.get_ref())
     .await {
@@ -184,8 +186,8 @@ pub async fn get_sleep_data_range(
         ORDER BY night_date ASC
         "#,
         user_id,
-        query.start_date,
-        query.end_date
+        start_date,
+        end_date
     )
     .fetch_all(pool.get_ref())
     .await {
@@ -258,15 +260,17 @@ pub async fn get_sleep_summary_by_date(
             }));
         }
     };
-    
-    // Validate date format
-    if let Err(_) = NaiveDate::parse_from_str(&query.date, "%Y-%m-%d") {
-        tracing::warn!("Invalid date format provided: {}", query.date);
-        return HttpResponse::BadRequest().json(json!({
-            "status": "error",
-            "message": "Invalid date format. Expected YYYY-MM-DD."
-        }));
-    }
+
+    let date = match NaiveDate::parse_from_str(&query.date, "%Y-%m-%d") {
+        Ok(date) => date,
+        Err(_) => {
+            tracing::warn!("Invalid date format provided: {}", query.date);
+            return HttpResponse::BadRequest().json(json!({
+                "status": "error",
+                "message": "Invalid date format. Expected YYYY-MM-DD."
+            }));
+        }
+    };
     
     tracing::info!("Beginning database query for sleep summary");
     
@@ -285,7 +289,7 @@ pub async fn get_sleep_summary_by_date(
         LIMIT 1
         "#,
         user_id,
-        query.date
+        date
     )
     .fetch_optional(pool.get_ref())
     .await {
@@ -381,8 +385,8 @@ pub async fn get_weekly_sleep_trends(
         ORDER BY night_date ASC
         "#,
         user_id,
-        seven_days_ago_str,
-        today_str
+        seven_days_ago,
+        today
     )
     .fetch_all(pool.get_ref())
     .await {
@@ -399,6 +403,8 @@ pub async fn get_weekly_sleep_trends(
                     }
                 }));
             }
+
+            let records_count = records.len();
             
             // Calculate weekly trends
             let mut sleep_scores = Vec::new();
@@ -406,7 +412,7 @@ pub async fn get_weekly_sleep_trends(
             let mut deep_sleep_percentages = Vec::new();
             let mut daily_summaries = Vec::new();
             
-            for record in records {
+            for record in &records {
                 match serde_json::from_value::<SleepSummary>(record.data.clone()) {
                     Ok(summary) => {
                         sleep_scores.push(summary.sleep_score);
@@ -461,7 +467,7 @@ pub async fn get_weekly_sleep_trends(
             HttpResponse::Ok().json(json!({
                 "status": "success",
                 "data": {
-                    "days_with_data": records.len(),
+                    "days_with_data": records_count,
                     "average_sleep_score": avg_sleep_score,
                     "average_sleep_time_hours": avg_sleep_time,
                     "average_deep_sleep_percentage": avg_deep_sleep_percentage,

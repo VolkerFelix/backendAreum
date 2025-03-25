@@ -91,12 +91,12 @@ pub struct StageDistribution {
 }
 
 // Query parameters for retrieving sleep data
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct SleepDateQuery {
     pub date: String,  // Expected format: YYYY-MM-DD
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct SleepRangeQuery {
     pub start_date: String,  // YYYY-MM-DD
     pub end_date: String,    // YYYY-MM-DD
