@@ -5,15 +5,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SleepStage {
-    #[serde(rename = "Awake")]
     Awake,
-    #[serde(rename = "Light")]
     Light,
-    #[serde(rename = "Deep")]
     Deep,
-    #[serde(rename = "REM")]
     REM,
-    #[serde(rename = "Unknown")]
     Unknown,
 }
 
@@ -27,31 +22,20 @@ impl Default for SleepStage {
 pub struct SleepStageSample {
     pub timestamp: DateTime<Utc>,
     pub stage: SleepStage,
-    #[serde(default)]
     pub confidence: Option<f64>,
-    #[serde(default)]
     pub duration_seconds: Option<i32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SleepMetrics {
-    #[serde(default)]
     pub sleep_efficiency: Option<f64>,  // Percentage of time in bed spent sleeping
-    #[serde(default)]
     pub sleep_latency_seconds: Option<i32>,  // Time taken to fall asleep
-    #[serde(default)]
     pub awakenings: Option<i32>,  // Number of times woken up
-    #[serde(default)]
     pub time_in_bed_seconds: Option<i32>,  // Total time in bed
-    #[serde(default)]
     pub total_sleep_seconds: Option<i32>,  // Total time spent sleeping
-    #[serde(default)]
     pub light_sleep_seconds: Option<i32>,  // Time spent in light sleep
-    #[serde(default)]
     pub deep_sleep_seconds: Option<i32>,  // Time spent in deep sleep
-    #[serde(default)]
     pub rem_sleep_seconds: Option<i32>,  // Time spent in REM sleep
-    #[serde(default)]
     pub awake_seconds: Option<i32>,  // Time spent awake after falling asleep
 }
 
