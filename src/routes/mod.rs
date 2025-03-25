@@ -32,5 +32,9 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
             .service(health_data::upload_gps_location)
             .service(health_data::get_gps_location_data)
             .service(health_data::get_health_with_gps)
+            .service(health_data::get_sleep_data)
+            .service(health_data::get_sleep_range)
+            .service(health_data::get_sleep_summary)
+            .service(health_data::get_sleep_trends)
     );
 }

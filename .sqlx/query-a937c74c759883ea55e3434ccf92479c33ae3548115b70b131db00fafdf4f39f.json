@@ -1,0 +1,48 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT \n            id, \n            user_id, \n            night_date,\n            data as \"data: serde_json::Value\", \n            created_at\n        FROM processed_sleep_data \n        WHERE user_id = $1 \n          AND night_date >= $2 \n          AND night_date <= $3\n          AND data_type = 'sleep_stages'\n        ORDER BY night_date ASC\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "night_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 3,
+        "name": "data: serde_json::Value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Date"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "a937c74c759883ea55e3434ccf92479c33ae3548115b70b131db00fafdf4f39f"
+}

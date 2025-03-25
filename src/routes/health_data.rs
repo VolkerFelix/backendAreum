@@ -14,13 +14,23 @@ use crate::handlers::health_data::{
     gps_location::get_health_data_with_gps
 };
 use crate::middleware::auth::Claims;
-use crate::models::health_data::{
+use crate::models::sensor_data::{
     AccelerationDataUpload, 
     HeartRateDataUpload, 
     BloodOxygenDataUpload,
     SkinTemperatureDataUpload,
     GpsLocationDataUpload,
     HealthDataTimeQuery
+};
+use crate::models::sleep::{
+    SleepDateQuery, SleepRangeQuery
+};
+
+use crate::handlers::health_data::sleep::{
+    get_sleep_data_by_date,
+    get_sleep_data_range,
+    get_sleep_summary_by_date,
+    get_weekly_sleep_trends
 };
 
 #[post("/upload_acceleration")]
@@ -115,4 +125,39 @@ async fn get_health_with_gps(
     params: web::Query<HealthDataTimeQuery>
 ) -> HttpResponse {
     get_health_data_with_gps(pool, claims, params).await
+}
+
+#[get("/sleep_data")]
+async fn get_sleep_data(
+    query: web::Query<SleepDateQuery>,
+    pool: web::Data<sqlx::PgPool>,
+    claims: web::ReqData<Claims>
+) -> HttpResponse {
+    get_sleep_data_by_date(query, pool, claims).await
+}
+
+#[get("/sleep_data_range")]
+async fn get_sleep_range(
+    query: web::Query<SleepRangeQuery>,
+    pool: web::Data<sqlx::PgPool>,
+    claims: web::ReqData<Claims>
+) -> HttpResponse {
+    get_sleep_data_range(query, pool, claims).await
+}
+
+#[get("/sleep_summary")]
+async fn get_sleep_summary(
+    query: web::Query<SleepDateQuery>,
+    pool: web::Data<sqlx::PgPool>,
+    claims: web::ReqData<Claims>
+) -> HttpResponse {
+    get_sleep_summary_by_date(query, pool, claims).await
+}
+
+#[get("/sleep_trends")]
+async fn get_sleep_trends(
+    pool: web::Data<sqlx::PgPool>,
+    claims: web::ReqData<Claims>
+) -> HttpResponse {
+    get_weekly_sleep_trends(pool, claims).await
 }
