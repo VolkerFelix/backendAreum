@@ -8,27 +8,53 @@ use crate::middleware::auth::Claims;
 use crate::models::onboarding::{
     ApiResponse, PersonalizationRequest, PersonalizationResponse
 };
-use super::status::get_or_create_onboarding_progress;
 
-// Continuation of submit_personalization function
+#[tracing::instrument(
+    name = "Submit personalization",
+    skip(data, pool, claims),
+    fields(
+        user_id = %claims.sub
+    )
+)]
 pub async fn submit_personalization(
     data: web::Json<PersonalizationRequest>,
     pool: web::Data<PgPool>,
     claims: web::ReqData<Claims>,
 ) -> HttpResponse {
-    // Previous code for parsing, transaction setup, and database operations goes here...
-
-    // The commit transaction code was truncated in the previous artifact
-    match tx.commit().await {
-        Ok(_) => (),
-        Err(e) => {
-            tracing::error!("Failed to commit transaction: {:?}", e);
-            return HttpResponse::InternalServerError().json(ApiResponse {
+    // Parse user ID from claims
+    let user_id = match Uuid::parse_str(&claims.sub) {
+        Ok(id) => id,
+        Err(_) => {
+            tracing::error!("Invalid user ID format");
+            return HttpResponse::BadRequest().json(ApiResponse {
                 status: "error".to_string(),
-                message: Some("Database error".to_string()),
-                data: None::<()>,
+                message: Some("Invalid user ID format".to_string()),
+                data: None::<()>,   
             });
         }
+    };
+
+    // Insert personalization info into database
+    let result = sqlx::query!(
+        r#"
+        INSERT INTO personalization_info (user_id, stress_triggers, work_type, timezone)
+        VALUES ($1, $2, $3, $4)
+        "#,
+        user_id,
+        data.stress_triggers,
+        data.work_type,
+        data.timezone
+    )
+    .execute(pool.get_ref())    
+    .await;
+
+    if let Err(e) = result {
+        tracing::error!("Failed to insert personalization info: {:?}", e);
+        return HttpResponse::InternalServerError().json(ApiResponse {
+            status: "error".to_string(),
+            message: Some(format!("Failed to insert personalization info: {}", e)),
+            data: None,
+        });
     }
 
     // Return success response
@@ -55,6 +81,7 @@ pub async fn get_personalization(
     let user_id = match Uuid::parse_str(&claims.sub) {
         Ok(id) => id,
         Err(_) => {
+            tracing::error!("Invalid user ID format");
             return HttpResponse::BadRequest().json(ApiResponse {
                 status: "error".to_string(),
                 message: Some("Invalid user ID format".to_string()),
@@ -64,19 +91,29 @@ pub async fn get_personalization(
     };
 
     // Get personalization info
-    let personalization = match sqlx::query!(
+    let result = sqlx::query_as!(
+        PersonalizationResponse,
         r#"
         SELECT 
-            stress_triggers, work_type, timezone
+            id,
+            user_id,
+            stress_triggers,
+            work_type,
+            timezone,
+            created_at,
+            updated_at
         FROM personalization_info
         WHERE user_id = $1
         "#,
         user_id
     )
-    .fetch_optional(&**pool)
-    .await {
+    .fetch_optional(pool.get_ref())
+    .await;
+
+    let personalization = match result {
         Ok(Some(record)) => record,
         Ok(None) => {
+            tracing::error!("Personalization info not found");
             return HttpResponse::NotFound().json(ApiResponse {
                 status: "error".to_string(),
                 message: Some("Personalization info not found".to_string()),
@@ -84,7 +121,7 @@ pub async fn get_personalization(
             });
         },
         Err(e) => {
-            tracing::error!("Failed to get personalization info: {:?}", e);
+            tracing::error!("Failed to get personalization info: {:?}", e); 
             return HttpResponse::InternalServerError().json(ApiResponse {
                 status: "error".to_string(),
                 message: Some("Database error".to_string()),
@@ -93,16 +130,9 @@ pub async fn get_personalization(
         }
     };
 
-    // Prepare response
-    let response = PersonalizationResponse {
-        stress_triggers: personalization.stress_triggers.map(|triggers| triggers.to_vec()),
-        work_type: personalization.work_type,
-        timezone: personalization.timezone,
-    };
-
     HttpResponse::Ok().json(ApiResponse {
         status: "success".to_string(),
         message: None,
-        data: Some(response),
+        data: Some(personalization),
     })
 }

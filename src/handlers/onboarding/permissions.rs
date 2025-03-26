@@ -25,6 +25,7 @@ pub async fn get_permissions_setup(
     let user_id = match Uuid::parse_str(&claims.sub) {
         Ok(id) => id,
         Err(_) => {
+            tracing::error!("Invalid user ID format");
             return HttpResponse::BadRequest().json(ApiResponse {
                 status: "error".to_string(),
                 message: Some("Invalid user ID format".to_string()),
