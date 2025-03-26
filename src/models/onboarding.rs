@@ -233,7 +233,7 @@ pub struct PermissionsSetupResponse {
 pub struct ThirdPartyConnectionResponse {
     pub connection_type: String,
     pub connection_status: String,
-    pub last_sync_at: Option<String>,
+    pub last_sync_at: Option<DateTime<Utc>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

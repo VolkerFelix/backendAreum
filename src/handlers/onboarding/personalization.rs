@@ -91,26 +91,20 @@ pub async fn get_personalization(
     };
 
     // Get personalization info
-    let result = sqlx::query_as!(
+    let personalization = match sqlx::query_as!(
         PersonalizationResponse,
         r#"
         SELECT 
-            id,
-            user_id,
             stress_triggers,
             work_type,
-            timezone,
-            created_at,
-            updated_at
+            timezone
         FROM personalization_info
         WHERE user_id = $1
         "#,
         user_id
     )
     .fetch_optional(pool.get_ref())
-    .await;
-
-    let personalization = match result {
+    .await{
         Ok(Some(record)) => record,
         Ok(None) => {
             tracing::warn!("Personalization info not found");

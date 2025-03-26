@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            tpct.name as connection_type,\n            utpc.connection_status,\n            utpc.last_sync_at\n        FROM user_third_party_connections utpc\n        JOIN third_party_connection_types tpct ON utpc.connection_type_id = tpct.id\n        WHERE utpc.user_id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "connection_type",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "connection_status",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "last_sync_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "6dc1da965f112a97bb0aa67c9ad054643bd6777f6bd77b7aea9cfc8b744b17fe"
+}

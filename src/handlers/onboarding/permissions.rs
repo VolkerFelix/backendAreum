@@ -64,7 +64,7 @@ pub async fn get_permissions_setup(
             return HttpResponse::InternalServerError().json(ApiResponse {
                 status: "error".to_string(),
                 message: Some(format!("Failed to fetch permissions settings: {}", e)),
-                data: None,
+                data: None::<()>,
             });
         }
     };
@@ -74,19 +74,12 @@ pub async fn get_permissions_setup(
         ThirdPartyConnectionResponse,
         r#"
         SELECT
-            id,
-            user_id,
-            connection_type_id,
-            access_token,
-            refresh_token,
-            token_expires_at,
-            connection_status, 
-            last_sync_at,
-            connection_data,
-            created_at,
-            updated_at
-        FROM user_third_party_connections
-        WHERE user_id = $1
+            tpct.name as connection_type,
+            utpc.connection_status,
+            utpc.last_sync_at
+        FROM user_third_party_connections utpc
+        JOIN third_party_connection_types tpct ON utpc.connection_type_id = tpct.id
+        WHERE utpc.user_id = $1
         "#,
         user_id
     )
@@ -100,7 +93,7 @@ pub async fn get_permissions_setup(
             return HttpResponse::InternalServerError().json(ApiResponse {
                 status: "error".to_string(),
                 message: Some(format!("Failed to fetch third-party connections: {}", e)),
-                data: None,
+                data: None::<()>,
             });
         }
     };
@@ -183,7 +176,7 @@ pub async fn submit_permissions_setup(
         return HttpResponse::InternalServerError().json(ApiResponse {
             status: "error".to_string(),
             message: Some(format!("Failed to update permissions settings: {}", e)),
-            data: None,
+            data: None::<()>,
         });
     }
 
@@ -203,7 +196,7 @@ pub async fn submit_permissions_setup(
                 return HttpResponse::BadRequest().json(ApiResponse {
                     status: "error".to_string(),
                     message: Some(format!("Invalid connection type: {}", connection.connection_type)),
-                    data: None,
+                    data: None::<()>,
                 });
             }
             Err(e) => {
@@ -211,7 +204,7 @@ pub async fn submit_permissions_setup(
                 return HttpResponse::InternalServerError().json(ApiResponse {
                     status: "error".to_string(),
                     message: Some(format!("Failed to get connection type: {}", e)),
-                    data: None,
+                    data: None::<()>,
                 });
             }
         };
@@ -245,7 +238,7 @@ pub async fn submit_permissions_setup(
             return HttpResponse::InternalServerError().json(ApiResponse {
                 status: "error".to_string(),
                 message: Some(format!("Failed to update third-party connection: {}", e)),
-                data: None,
+                data: None::<()>,
             });
         }
     }
@@ -271,7 +264,7 @@ pub async fn submit_permissions_setup(
         return HttpResponse::InternalServerError().json(ApiResponse {
             status: "error".to_string(),
             message: Some(format!("Failed to update onboarding progress: {}", e)),
-            data: None,
+            data: None::<()>,
         });
     }
 
@@ -304,7 +297,7 @@ pub async fn submit_permissions_setup(
             return HttpResponse::InternalServerError().json(ApiResponse {
                 status: "error".to_string(),
                 message: Some(format!("Failed to fetch updated permissions: {}", e)),
-                data: None,
+                data: None::<()>,
             });
         }
     };
@@ -313,16 +306,9 @@ pub async fn submit_permissions_setup(
         ThirdPartyConnectionResponse,
         r#"
         SELECT
-            utpc.id,
-            utpc.user_id,
-            utpc.connection_type_id,
-            utpc.access_token,
-            utpc.refresh_token,
-            utpc.token_expires_at,
+            tpct.name as connection_type,
             utpc.connection_status,
-            utpc.last_sync_at,
-            utpc.connection_data,
-            utpc.created_at, utpc.updated_at
+            utpc.last_sync_at
         FROM user_third_party_connections utpc
         JOIN third_party_connection_types tpct ON utpc.connection_type_id = tpct.id
         WHERE utpc.user_id = $1
@@ -338,7 +324,7 @@ pub async fn submit_permissions_setup(
             return HttpResponse::InternalServerError().json(ApiResponse {
                 status: "error".to_string(),
                 message: Some(format!("Failed to fetch third-party connections: {}", e)),
-                data: None,
+                data: None::<()>,
             });
         }
     };

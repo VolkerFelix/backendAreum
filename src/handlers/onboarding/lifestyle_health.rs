@@ -161,20 +161,27 @@ pub async fn get_lifestyle_health(
     let result = sqlx::query_as!(
         LifestyleInfo,
         r#"
-        SELECT 
-            activity_level, bedtime, wake_time,
+        SELECT
+            id, user_id, activity_level, bedtime, wake_time,
             is_smoker, alcohol_consumption, tracks_menstrual_cycle, 
-            created_at, id, menstrual_cycle_data, updated_at
+            created_at, menstrual_cycle_data, updated_at
         FROM lifestyle_info
         WHERE user_id = $1
         "#,
         user_id
     )
-    .fetch_all(pool.get_ref())
+    .fetch_optional(pool.get_ref())
     .await;
 
     let lifestyle = match result {
-        Ok(records) => records,
+        Ok(Some(record)) => record,
+        Ok(None) => {
+            return HttpResponse::NotFound().json(ApiResponse {
+                status: "error".to_string(),
+                message: Some("Lifestyle info not found".to_string()),
+                data: None::<()>,
+            });
+        },
         Err(e) => {
             tracing::error!("Failed to get lifestyle info: {:?}", e);
             return HttpResponse::InternalServerError().json(ApiResponse {
@@ -222,7 +229,7 @@ pub async fn get_lifestyle_health(
         is_smoker: lifestyle.is_smoker,
         alcohol_consumption: lifestyle.alcohol_consumption,
         tracks_menstrual_cycle: lifestyle.tracks_menstrual_cycle,
-        medical_conditions: conditions,
+        medical_conditions: conditions.into_iter().map(|c| c.name).collect(),
     };
 
     HttpResponse::Ok().json(ApiResponse {

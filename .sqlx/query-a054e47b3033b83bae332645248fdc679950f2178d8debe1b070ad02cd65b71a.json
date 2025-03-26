@@ -1,55 +1,60 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT \n            activity_level, bedtime, wake_time,\n            is_smoker, alcohol_consumption, tracks_menstrual_cycle, \n            created_at, id, menstrual_cycle_data, updated_at\n        FROM lifestyle_info\n        WHERE user_id = $1\n        ",
+  "query": "\n        SELECT\n            id, user_id, activity_level, bedtime, wake_time,\n            is_smoker, alcohol_consumption, tracks_menstrual_cycle, \n            created_at, menstrual_cycle_data, updated_at\n        FROM lifestyle_info\n        WHERE user_id = $1\n        ",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
-        "name": "activity_level",
-        "type_info": "Varchar"
-      },
-      {
-        "ordinal": 1,
-        "name": "bedtime",
-        "type_info": "Time"
-      },
-      {
-        "ordinal": 2,
-        "name": "wake_time",
-        "type_info": "Time"
-      },
-      {
-        "ordinal": 3,
-        "name": "is_smoker",
-        "type_info": "Bool"
-      },
-      {
-        "ordinal": 4,
-        "name": "alcohol_consumption",
-        "type_info": "Varchar"
-      },
-      {
-        "ordinal": 5,
-        "name": "tracks_menstrual_cycle",
-        "type_info": "Bool"
-      },
-      {
-        "ordinal": 6,
-        "name": "created_at",
-        "type_info": "Timestamptz"
-      },
-      {
-        "ordinal": 7,
         "name": "id",
         "type_info": "Uuid"
       },
       {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "activity_level",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "bedtime",
+        "type_info": "Time"
+      },
+      {
+        "ordinal": 4,
+        "name": "wake_time",
+        "type_info": "Time"
+      },
+      {
+        "ordinal": 5,
+        "name": "is_smoker",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 6,
+        "name": "alcohol_consumption",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "tracks_menstrual_cycle",
+        "type_info": "Bool"
+      },
+      {
         "ordinal": 8,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 9,
         "name": "menstrual_cycle_data",
         "type_info": "Jsonb"
       },
       {
-        "ordinal": 9,
+        "ordinal": 10,
         "name": "updated_at",
         "type_info": "Timestamptz"
       }
@@ -61,16 +66,17 @@
     },
     "nullable": [
       false,
-      true,
-      true,
-      true,
-      true,
-      true,
       false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
       false,
       true,
       false
     ]
   },
-  "hash": "7c12728f9fef5e5a4ca02fe38042d93a137e3bb4161d5ca1b11fdd6ded0f5d9e"
+  "hash": "a054e47b3033b83bae332645248fdc679950f2178d8debe1b070ad02cd65b71a"
 }

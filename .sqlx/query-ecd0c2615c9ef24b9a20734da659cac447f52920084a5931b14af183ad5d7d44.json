@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT \n            stress_triggers,\n            work_type,\n            timezone\n        FROM personalization_info\n        WHERE user_id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "stress_triggers",
+        "type_info": "TextArray"
+      },
+      {
+        "ordinal": 1,
+        "name": "work_type",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "timezone",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "ecd0c2615c9ef24b9a20734da659cac447f52920084a5931b14af183ad5d7d44"
+}
