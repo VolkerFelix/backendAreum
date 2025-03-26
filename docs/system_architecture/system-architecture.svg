@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 800">
+  <!-- Background -->
+  <rect width="1000" height="800" fill="#f8f9fa" />
+  
+  <!-- Title -->
+  <text x="500" y="40" font-family="Arial" font-size="24" font-weight="bold" text-anchor="middle" fill="#333">Areum Health System Architecture</text>
+  
+  <!-- Cloud Section -->
+  <rect x="250" y="70" width="700" height="450" rx="15" ry="15" fill="#E1F5FE" fill-opacity="0.5" stroke="#64B5F6" stroke-width="2" stroke-dasharray="5,5" />
+  <text x="600" y="90" font-family="Arial" font-size="18" font-weight="bold" text-anchor="middle" fill="#1976D2">Cloud Microservices Architecture</text>
+  
+  <!-- API Gateway -->
+  <rect x="450" y="110" width="300" height="50" rx="5" ry="5" fill="#1976D2" stroke="#0D47A1" stroke-width="2" />
+  <text x="600" y="140" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="white">API Gateway Service</text>
+
+  <!-- Microservices -->
+  <rect x="300" y="190" width="170" height="60" rx="5" ry="5" fill="#26A69A" stroke="#00796B" stroke-width="2" />
+  <text x="385" y="220" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="white">Authentication &</text>
+  <text x="385" y="240" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="white">User Management</text>
+  
+  <rect x="300" y="270" width="170" height="60" rx="5" ry="5" fill="#26A69A" stroke="#00796B" stroke-width="2" />
+  <text x="385" y="300" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="white">Health Data</text>
+  <text x="385" y="320" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="white">Ingestion Service</text>
+  
+  <rect x="300" y="350" width="170" height="60" rx="5" ry="5" fill="#26A69A" stroke="#00796B" stroke-width="2" />
+  <text x="385" y="380" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="white">Sleep Analysis</text>
+  <text x="385" y="400" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="white">Microservice</text>
+  
+  <rect x="300" y="430" width="170" height="60" rx="5" ry="5" fill="#26A69A" stroke="#00796B" stroke-width="2" />
+  <text x="385" y="460" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="white">Activity Recognition</text>
+  <text x="385" y="480" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="white">Microservice</text>
+  
+  <rect x="730" y="190" width="170" height="60" rx="5" ry="5" fill="#26A69A" stroke="#00796B" stroke-width="2" />
+  <text x="815" y="220" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="white">Stress Analysis</text>
+  <text x="815" y="240" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="white">Microservice</text>
+  
+  <rect x="730" y="270" width="170" height="60" rx="5" ry="5" fill="#26A69A" stroke="#00796B" stroke-width="2" />
+  <text x="815" y="300" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="white">Health Insights &</text>
+  <text x="815" y="320" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="white">Recommendations</text>
+  
+  <rect x="730" y="350" width="170" height="60" rx="5" ry="5" fill="#26A69A" stroke="#00796B" stroke-width="2" />
+  <text x="815" y="380" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="white">Notification</text>
+  <text x="815" y="400" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="white">Service</text>
+
+  <!-- Analytics Service -->
+  <rect x="490" y="370" width="220" height="70" rx="5" ry="5" fill="#7E57C2" stroke="#4527A0" stroke-width="2" />
+  <text x="600" y="405" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="white">Data Analytics Engine</text>
+  <text x="600" y="425" font-family="Arial" font-size="12" text-anchor="middle" fill="white">(AI/ML Processing)</text>
+
+  <!-- Database Section -->
+  <rect x="300" y="550" width="600" height="100" rx="5" ry="5" fill="#FFECB3" stroke="#FFB300" stroke-width="2" />
+  <text x="600" y="570" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="#E65100">Data Layer</text>
+  
+  <rect x="330" y="585" width="150" height="50" rx="5" ry="5" fill="#FF9800" stroke="#E65100" stroke-width="2" />
+  <text x="405" y="615" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="white">User Database</text>
+  <text x="405" y="630" font-family="Arial" font-size="10" text-anchor="middle" fill="white">(PostgreSQL)</text>
+  
+  <rect x="520" y="585" width="150" height="50" rx="5" ry="5" fill="#FF9800" stroke="#E65100" stroke-width="2" />
+  <text x="595" y="615" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="white">Time-Series DB</text>
+  <text x="595" y="630" font-family="Arial" font-size="10" text-anchor="middle" fill="white">(TimescaleDB)</text>
+  
+  <rect x="710" y="585" width="150" height="50" rx="5" ry="5" fill="#FF9800" stroke="#E65100" stroke-width="2" />
+  <text x="785" y="615" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="white">Data Warehouse</text>
+  <text x="785" y="630" font-family="Arial" font-size="10" text-anchor="middle" fill="white">(Analytics)</text>
+
+  <!-- Mobile App -->
+  <rect x="50" y="190" width="150" height="230" rx="20" ry="20" fill="#E8F5E9" stroke="#43A047" stroke-width="2" />
+  <text x="125" y="220" font-family="Arial" font-size="16" font-weight="bold" text-anchor="middle" fill="#2E7D32">Mobile App Gateway</text>
+  <rect x="75" y="240" width="100" height="160" rx="10" ry="10" fill="#C8E6C9" stroke="#43A047" stroke-width="2" />
+  
+  <!-- App Components -->
+  <rect x="85" y="250" width="80" height="30" rx="5" ry="5" fill="#4CAF50" stroke="#2E7D32" stroke-width="1" />
+  <text x="125" y="270" font-family="Arial" font-size="10" font-weight="bold" text-anchor="middle" fill="white">UI Layer</text>
+  
+  <rect x="85" y="290" width="80" height="30" rx="5" ry="5" fill="#4CAF50" stroke="#2E7D32" stroke-width="1" />
+  <text x="125" y="310" font-family="Arial" font-size="10" font-weight="bold" text-anchor="middle" fill="white">Business Logic</text>
+  
+  
+  
+  <rect x="85" y="370" width="80" height="30" rx="5" ry="5" fill="#4CAF50" stroke="#2E7D32" stroke-width="1" />
+  <text x="125" y="390" font-family="Arial" font-size="10" font-weight="bold" text-anchor="middle" fill="white">BLE Module</text>
+
+  <!-- Wearable Device -->
+  <ellipse cx="125" cy="550" rx="80" ry="40" fill="#E1BEE7" stroke="#8E24AA" stroke-width="2" />
+  <text x="125" y="545" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="#4A148C">Areum Bracelet</text>
+  <text x="125" y="565" font-family="Arial" font-size="10" text-anchor="middle" fill="#4A148C">(Sensors & BLE)</text>
+
+  <!-- Connection Lines -->
+  <!-- API Gateway to Microservices -->
+  <path d="M600 160 L600 180 L385 180 L385 190" stroke="#1976D2" stroke-width="2" fill="none" stroke-dasharray="4,2" />
+  <path d="M600 160 L600 180 L815 180 L815 190" stroke="#1976D2" stroke-width="2" fill="none" stroke-dasharray="4,2" />
+  
+  <!-- Microservices to Analytics -->
+  <path d="M385 410 L385 450 L490 410" stroke="#26A69A" stroke-width="2" fill="none" />
+  <path d="M815 330 L815 410 L710 410" stroke="#26A69A" stroke-width="2" fill="none" />
+  
+  <!-- Microservices to Databases -->
+  <path d="M600 440 L600 550" stroke="#7E57C2" stroke-width="2" fill="none" />
+  
+  <!-- Mobile App to API Gateway -->
+  <path d="M200 305 L250 305 L250 135 L450 135" stroke="#43A047" stroke-width="2" fill="none" />
+  
+  <!-- Mobile App to Wearable -->
+  <path d="M125 420 L125 510" stroke="#8E24AA" stroke-width="2" fill="none" stroke-dasharray="4,2" />
+  <text x="145" y="470" font-family="Arial" font-size="12" text-anchor="middle" fill="#8E24AA">BLE</text>
+  
+  <!-- Legend -->
+  <rect x="750" y="450" width="150" height="100" rx="5" ry="5" fill="white" stroke="#333" stroke-width="1" />
+  <text x="825" y="470" font-family="Arial" font-size="14" font-weight="bold" text-anchor="middle" fill="#333">Legend</text>
+  
+  <rect x="770" y="480" width="15" height="15" fill="#1976D2" />
+  <text x="830" y="492" font-family="Arial" font-size="12" text-anchor="middle" fill="#333">Gateway</text>
+  
+  <rect x="770" y="500" width="15" height="15" fill="#26A69A" />
+  <text x="830" y="512" font-family="Arial" font-size="12" text-anchor="middle" fill="#333">Microservices</text>
+  
+  <rect x="770" y="520" width="15" height="15" fill="#7E57C2" />
+  <text x="830" y="532" font-family="Arial" font-size="12" text-anchor="middle" fill="#333">Analytics</text>
+</svg>
