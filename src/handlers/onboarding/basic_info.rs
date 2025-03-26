@@ -3,6 +3,7 @@ use chrono::{NaiveDate, Utc};
 use sqlx::PgPool;
 use uuid::Uuid;
 use serde_json::json;
+use num_traits::cast::ToPrimitive;
 
 use crate::middleware::auth::Claims;
 use crate::models::onboarding::{
