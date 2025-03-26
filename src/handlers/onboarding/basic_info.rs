@@ -6,10 +6,16 @@ use serde_json::json;
 
 use crate::middleware::auth::Claims;
 use crate::models::onboarding::{
-    ApiResponse, BasicInfoRequest, BasicInfoResponse
+    ApiResponse, BasicInfoRequest, BasicInfoResponse, GoalType
 };
 
-// Continuation of the submit_basic_info handler for goal processing
+#[tracing::instrument(
+    name = "Submit basic info",
+    skip(data, pool, claims),
+    fields(
+        user_id = %claims.sub
+    )
+)]
 pub async fn submit_basic_info(
     data: web::Json<BasicInfoRequest>,
     pool: web::Data<PgPool>,
@@ -19,6 +25,7 @@ pub async fn submit_basic_info(
     let user_id = match Uuid::parse_str(&claims.sub) {
         Ok(id) => id,
         Err(_) => {
+            tracing::error!("Invalid user ID format");
             return HttpResponse::BadRequest().json(ApiResponse {
                 status: "error".to_string(),
                 message: Some("Invalid user ID format".to_string()),
@@ -26,22 +33,6 @@ pub async fn submit_basic_info(
             });
         }
     };
-
-    // Start a transaction
-    let mut tx = match pool.begin().await {
-        Ok(tx) => tx,
-        Err(e) => {
-            tracing::error!("Failed to start transaction: {:?}", e);
-            return HttpResponse::InternalServerError().json(ApiResponse {
-                status: "error".to_string(),
-                message: Some("Database error".to_string()),
-                data: None::<()>,
-            });
-        }
-    };
-
-    // Previous code for parsing DOB and user profile handling goes here...
-
     // Clear existing goals for the user
     match sqlx::query!(
         r#"
@@ -50,7 +41,7 @@ pub async fn submit_basic_info(
         "#,
         user_id
     )
-    .execute(&mut *tx)
+    .execute(pool.get_ref())
     .await {
         Ok(_) => (),
         Err(e) => {
@@ -75,7 +66,7 @@ pub async fn submit_basic_info(
             "#,
             goal_name
         )
-        .fetch_optional(&mut *tx)
+        .fetch_optional(pool.get_ref())
         .await {
             Ok(Some(record)) => record,
             Ok(None) => {
@@ -106,7 +97,7 @@ pub async fn submit_basic_info(
             (index + 1) as i32, // Priority based on order
             now
         )
-        .execute(&mut *tx)
+        .execute(pool.get_ref())
         .await {
             Ok(_) => (),
             Err(e) => {
@@ -133,24 +124,11 @@ pub async fn submit_basic_info(
         now,
         user_id
     )
-    .execute(&mut *tx)
+    .execute(pool.get_ref())
     .await {
         Ok(_) => (),
         Err(e) => {
             tracing::error!("Failed to update onboarding progress: {:?}", e);
-            return HttpResponse::InternalServerError().json(ApiResponse {
-                status: "error".to_string(),
-                message: Some("Database error".to_string()),
-                data: None::<()>,
-            });
-        }
-    }
-
-    // Commit transaction
-    match tx.commit().await {
-        Ok(_) => (),
-        Err(e) => {
-            tracing::error!("Failed to commit transaction: {:?}", e);
             return HttpResponse::InternalServerError().json(ApiResponse {
                 status: "error".to_string(),
                 message: Some("Database error".to_string()),
@@ -183,6 +161,7 @@ pub async fn get_basic_info(
     let user_id = match Uuid::parse_str(&claims.sub) {
         Ok(id) => id,
         Err(_) => {
+            tracing::error!("Invalid user ID format");
             return HttpResponse::BadRequest().json(ApiResponse {
                 status: "error".to_string(),
                 message: Some("Invalid user ID format".to_string()),
@@ -202,10 +181,11 @@ pub async fn get_basic_info(
         "#,
         user_id
     )
-    .fetch_optional(&**pool)
+    .fetch_optional(pool.get_ref())
     .await {
         Ok(Some(record)) => record,
         Ok(None) => {
+            tracing::warn!("User profile not found");
             return HttpResponse::NotFound().json(ApiResponse {
                 status: "error".to_string(),
                 message: Some("User profile not found".to_string()),
@@ -223,9 +203,15 @@ pub async fn get_basic_info(
     };
 
     // Get user goals
-    let goals = match sqlx::query!(
+    let goals = match sqlx::query_as!(
+        GoalType,
         r#"
-        SELECT gt.name
+        SELECT
+            gt.id,
+            gt.name,
+            gt.description,
+            gt.created_at,
+            gt.updated_at
         FROM user_goals ug
         JOIN goal_types gt ON ug.goal_type_id = gt.id
         WHERE ug.user_id = $1
@@ -233,9 +219,9 @@ pub async fn get_basic_info(
         "#,
         user_id
     )
-    .fetch_all(&**pool)
+    .fetch_all(pool.get_ref())
     .await {
-        Ok(records) => records.into_iter().map(|r| r.name).collect::<Vec<String>>(),
+        Ok(records) => records,
         Err(e) => {
             tracing::error!("Failed to get user goals: {:?}", e);
             return HttpResponse::InternalServerError().json(ApiResponse {
@@ -254,8 +240,8 @@ pub async fn get_basic_info(
         display_name: profile.display_name,
         date_of_birth: dob_string,
         biological_sex: profile.biological_sex,
-        height_cm: profile.height_cm,
-        weight_kg: profile.weight_kg,
+        height_cm: profile.height_cm.map(|h| h.to_f64().unwrap_or(0.0)),
+        weight_kg: profile.weight_kg.map(|w| w.to_f64().unwrap_or(0.0)),
         goals,
     };
 

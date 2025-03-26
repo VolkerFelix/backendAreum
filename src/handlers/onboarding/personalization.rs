@@ -41,7 +41,7 @@ pub async fn submit_personalization(
         VALUES ($1, $2, $3, $4)
         "#,
         user_id,
-        data.stress_triggers,
+        data.stress_triggers.as_deref(),
         data.work_type,
         data.timezone
     )
@@ -53,7 +53,7 @@ pub async fn submit_personalization(
         return HttpResponse::InternalServerError().json(ApiResponse {
             status: "error".to_string(),
             message: Some(format!("Failed to insert personalization info: {}", e)),
-            data: None,
+            data: None::<()>,
         });
     }
 
@@ -113,7 +113,7 @@ pub async fn get_personalization(
     let personalization = match result {
         Ok(Some(record)) => record,
         Ok(None) => {
-            tracing::error!("Personalization info not found");
+            tracing::warn!("Personalization info not found");
             return HttpResponse::NotFound().json(ApiResponse {
                 status: "error".to_string(),
                 message: Some("Personalization info not found".to_string()),
