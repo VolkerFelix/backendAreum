@@ -40,6 +40,7 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
     );
     cfg.service(
         web::scope("/onboarding")
+            .wrap(AuthMiddleware)
             .service(onboarding::onboarding_status)
             .service(onboarding::submit_basic_info)
             .service(onboarding::get_basic_info)
