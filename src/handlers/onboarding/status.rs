@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::middleware::auth::Claims;
 use crate::models::onboarding::{ApiResponse, OnboardingStatusResponse};
-use super::common::get_or_create_onboarding_progress;
+use crate::handlers::onboarding::common::get_or_create_onboarding_progress;
 
 /// Handler for getting a user's onboarding status
 #[tracing::instrument(

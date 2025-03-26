@@ -11,7 +11,6 @@ use crate::models::onboarding::{
 };
 use crate::handlers::onboarding::{
     basic_info,
-    common,
     lifestyle_health,
     permissions,
     personalization,

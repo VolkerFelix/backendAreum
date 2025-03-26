@@ -1,8 +1,6 @@
 use actix_web::{web, HttpResponse};
-use chrono::Utc;
 use sqlx::PgPool;
 use uuid::Uuid;
-use serde_json::json;
 
 use crate::middleware::auth::Claims;
 use crate::models::onboarding::{

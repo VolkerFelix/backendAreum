@@ -1,5 +1,5 @@
 use actix_web::{web, HttpResponse};
-use chrono::{NaiveTime, Utc};
+use chrono::Utc;
 use sqlx::PgPool;
 use uuid::Uuid;
 use serde_json::json;
