@@ -11,6 +11,116 @@ use crate::models::onboarding::{
 };
 
 #[tracing::instrument(
+    name = "Get permissions setup",
+    skip(pool, claims),
+    fields(
+        user_id = %claims.sub
+    )
+)]
+pub async fn get_permissions_setup(
+    pool: web::Data<PgPool>,
+    claims: web::ReqData<Claims>,
+) -> HttpResponse {
+    // Parse user ID from claims
+    let user_id = match Uuid::parse_str(&claims.sub) {
+        Ok(id) => id,
+        Err(_) => {
+            return HttpResponse::BadRequest().json(ApiResponse {
+                status: "error".to_string(),
+                message: Some("Invalid user ID format".to_string()),
+                data: None::<()>,
+            });
+        }
+    };
+
+    // Get permissions settings from database
+    let result = sqlx::query_as!(
+        PermissionsSettings,
+        r#"
+        SELECT
+            id,
+            user_id,
+            heart_rate_enabled,
+            temperature_enabled,
+            spo2_enabled,
+            accelerometer_enabled,
+            notifications_enabled,
+            background_usage_enabled,
+            created_at,
+            updated_at
+        FROM permissions_settings
+        WHERE user_id = $1
+        "#,
+        user_id
+    )
+    .fetch_one(pool.get_ref())
+    .await;
+
+    let permissions = match result {
+        Ok(permissions) => permissions,
+        Err(e) => {
+            tracing::error!("Failed to fetch permissions settings: {:?}", e);
+            return HttpResponse::InternalServerError().json(ApiResponse {
+                status: "error".to_string(),
+                message: Some(format!("Failed to fetch permissions settings: {}", e)),
+                data: None,
+            });
+        }
+    };
+
+    // Get third-party connections from database
+    let result = sqlx::query_as!(
+        ThirdPartyConnectionResponse,
+        r#"
+        SELECT
+            id,
+            user_id,
+            connection_type_id,
+            access_token,
+            refresh_token,
+            token_expires_at,
+            connection_status, 
+            last_sync_at,
+            connection_data,
+            created_at,
+            updated_at
+        FROM user_third_party_connections
+        WHERE user_id = $1
+        "#,
+        user_id
+    )
+    .fetch_all(pool.get_ref())
+    .await;
+
+    let third_party_connections = match result {
+        Ok(connections) => connections,
+        Err(e) => {
+            tracing::error!("Failed to fetch third-party connections: {:?}", e);
+            return HttpResponse::InternalServerError().json(ApiResponse {
+                status: "error".to_string(),
+                message: Some(format!("Failed to fetch third-party connections: {}", e)),
+                data: None,
+            });
+        }
+    };
+
+    // Return the permissions and third-party connections
+    HttpResponse::Ok().json(ApiResponse {
+        status: "success".to_string(),
+        message: Some("Permissions setup fetched successfully".to_string()),
+        data: Some(PermissionsSetupResponse {
+            heart_rate_enabled: permissions.heart_rate_enabled,
+            temperature_enabled: permissions.temperature_enabled,
+            spo2_enabled: permissions.spo2_enabled,
+            accelerometer_enabled: permissions.accelerometer_enabled,
+            notifications_enabled: permissions.notifications_enabled,
+            background_usage_enabled: permissions.background_usage_enabled,
+            third_party_connections,
+        }),
+    })
+}
+
+#[tracing::instrument(
     name = "Submit permissions setup",
     skip(data,pool, claims),
     fields(
