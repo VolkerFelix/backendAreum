@@ -58,7 +58,7 @@ prepare_sqlx() {
 # Function to run tests
 run_tests() {
     echo -e "${YELLOW}Running tests...${NC}"
-    RUST_BACKTRACE=1 cargo test
+    TEST_LOG=true RUST_BACKTRACE=1 cargo test --test sleep_data_migration_test
 }
 
 # Main script execution

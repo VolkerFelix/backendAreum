@@ -21,6 +21,7 @@ pub async fn register_user(
     user_form: web::Json<RegistrationRequest>,
     pool: web::Data<PgPool>
 ) -> HttpResponse {
+    tracing::info!("Received registration request for username: {}", user_form.username);
     // Validate input data
     if user_form.username.is_empty() {
         tracing::error!("Username cannot be empty");

@@ -9,6 +9,8 @@ pub async fn register_and_login_user(client: &Client, test_app: &crate::common::
     let password = "password123";
     let email = format!("{}@example.com", username);
 
+    println!("Attempting to register user: {} and email: {}", username, email);
+
     // Register user
     let user_request = json!({
         "username": username,
@@ -16,12 +18,20 @@ pub async fn register_and_login_user(client: &Client, test_app: &crate::common::
         "email": email
     });
 
+    println!("Sending request body: {}", serde_json::to_string_pretty(&user_request).unwrap());
+
     let register_response = client
         .post(&format!("{}/register_user", &test_app.address))
         .json(&user_request)
         .send()
         .await
         .expect("Failed to execute registration request.");
+
+    if register_response.status() != 200 {
+        println!("Registration failed with status: {}", register_response.status().as_u16());
+        println!("Response body: {}", register_response.text().await.unwrap());
+        panic!("Registration failed");
+    }
 
     assert_eq!(200, register_response.status().as_u16(), "Registration should succeed");
 
