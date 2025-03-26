@@ -18,7 +18,8 @@ CREATE TABLE IF NOT EXISTS goal_types (
     id UUID PRIMARY KEY,
     name VARCHAR(50) UNIQUE NOT NULL,
     description TEXT,
-    created_at TIMESTAMPTZ NOT NULL
+    created_at TIMESTAMPTZ NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL
 );
 
 -- Create user_goals table (many-to-many relationship)
@@ -137,12 +138,12 @@ CREATE TABLE IF NOT EXISTS onboarding_progress (
 );
 
 -- Insert default goal types
-INSERT INTO goal_types (id, name, description, created_at)
+INSERT INTO goal_types (id, name, description, created_at, updated_at)
 VALUES
-    (gen_random_uuid(), 'stress_reduction', 'Reduce stress and improve mental wellbeing', NOW()),
-    (gen_random_uuid(), 'sleep_improvement', 'Improve sleep quality and duration', NOW()),
-    (gen_random_uuid(), 'fitness_activity', 'Increase physical fitness and activity levels', NOW()),
-    (gen_random_uuid(), 'general_wellness', 'Improve overall health and wellness', NOW())
+    (gen_random_uuid(), 'stress_reduction', 'Reduce stress and improve mental wellbeing', NOW(), NOW()),
+    (gen_random_uuid(), 'sleep_improvement', 'Improve sleep quality and duration', NOW(), NOW()),
+    (gen_random_uuid(), 'fitness_activity', 'Increase physical fitness and activity levels', NOW(), NOW()),
+    (gen_random_uuid(), 'general_wellness', 'Improve overall health and wellness', NOW(), NOW())
 ON CONFLICT (name) DO NOTHING;
 
 -- Insert default medical condition types

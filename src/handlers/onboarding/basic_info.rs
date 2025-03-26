@@ -204,15 +204,9 @@ pub async fn get_basic_info(
     };
 
     // Get user goals
-    let goals = match sqlx::query_as!(
-        GoalType,
+    let goals = match sqlx::query!(
         r#"
-        SELECT
-            gt.id,
-            gt.name,
-            gt.description,
-            gt.created_at,
-            gt.updated_at
+        SELECT gt.name
         FROM user_goals ug
         JOIN goal_types gt ON ug.goal_type_id = gt.id
         WHERE ug.user_id = $1
@@ -222,7 +216,7 @@ pub async fn get_basic_info(
     )
     .fetch_all(pool.get_ref())
     .await {
-        Ok(records) => records,
+        Ok(records) => records.into_iter().map(|r| r.name).collect::<Vec<String>>(),
         Err(e) => {
             tracing::error!("Failed to get user goals: {:?}", e);
             return HttpResponse::InternalServerError().json(ApiResponse {
