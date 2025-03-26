@@ -8,7 +8,6 @@ use crate::middleware::auth::Claims;
 use crate::models::onboarding::{
     ApiResponse, BasicInfoRequest, BasicInfoResponse
 };
-use super::status::get_or_create_onboarding_progress;
 
 // Continuation of the submit_basic_info handler for goal processing
 pub async fn submit_basic_info(

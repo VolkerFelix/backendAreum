@@ -62,7 +62,7 @@ pub async fn submit_lifestyle_health(
         .fetch_optional(pool.get_ref())
         .await;
 
-        match result {
+        let condition = match result {
             Ok(Some(record)) => record,
             Ok(None) => {
                 tracing::warn!("Medical condition type not found: {}", condition_name);
@@ -79,7 +79,7 @@ pub async fn submit_lifestyle_health(
         };
 
         // Insert user medical condition
-        match sqlx::query!(
+        let result = sqlx::query!(
             r#"
             INSERT INTO user_medical_conditions (
                 id, user_id, condition_id, diagnosed_at, notes, created_at, updated_at
@@ -89,24 +89,21 @@ pub async fn submit_lifestyle_health(
             Uuid::new_v4(),
             user_id,
             condition.id,
-            now
+            Utc::now()
         )
-        .execute(&mut *tx)
-        .await {
+        .execute(pool.get_ref())
+        .await;
+
+        match result {
             Ok(_) => (),
             Err(e) => {
                 tracing::error!("Failed to insert user medical condition: {:?}", e);
-                return HttpResponse::InternalServerError().json(ApiResponse {
-                    status: "error".to_string(),
-                    message: Some("Database error".to_string()),
-                    data: None::<()>,
-                });
             }
         }
     }
 
     // Update onboarding progress
-    match sqlx::query!(
+    let result = sqlx::query!(
         r#"
         UPDATE onboarding_progress
         SET 
@@ -115,32 +112,16 @@ pub async fn submit_lifestyle_health(
             updated_at = $1
         WHERE user_id = $2
         "#,
-        now,
+        Utc::now(),
         user_id
     )
-    .execute(&mut *tx)
-    .await {
+    .execute(pool.get_ref())
+    .await;
+
+    match result {
         Ok(_) => (),
         Err(e) => {
             tracing::error!("Failed to update onboarding progress: {:?}", e);
-            return HttpResponse::InternalServerError().json(ApiResponse {
-                status: "error".to_string(),
-                message: Some("Database error".to_string()),
-                data: None::<()>,
-            });
-        }
-    }
-
-    // Commit transaction
-    match tx.commit().await {
-        Ok(_) => (),
-        Err(e) => {
-            tracing::error!("Failed to commit transaction: {:?}", e);
-            return HttpResponse::InternalServerError().json(ApiResponse {
-                status: "error".to_string(),
-                message: Some("Database error".to_string()),
-                data: None::<()>,
-            });
         }
     }
 
