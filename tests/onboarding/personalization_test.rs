@@ -1,6 +1,5 @@
 use reqwest::Client;
 use serde_json::json;
-use uuid::Uuid;
 
 use crate::common::utils::spawn_app;
 use super::common::register_and_login_user;

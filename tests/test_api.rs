@@ -14,14 +14,15 @@ async fn health_check_works() {
 
     // Act
     let response = client
-        .get(&format!("{}/health_check", &test_app.address))
+        .get(&format!("{}/backend_health", &test_app.address))
         .send()
         .await
         .expect("Failed to execute request.");
 
     // Assert
     assert!(response.status().is_success());
-    assert_eq!(Some(0), response.content_length());
+    let json = response.json::<serde_json::Value>().await.expect("Failed to parse response as JSON");
+    assert_eq!(json["status"], "UP", "Response status should be 'UP'");
 }
 
 #[tokio::test]
