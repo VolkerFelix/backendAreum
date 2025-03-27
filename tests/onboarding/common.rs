@@ -5,7 +5,9 @@ use uuid::Uuid;
 use crate::common::utils::spawn_app;
 
 pub async fn register_and_login_user(client: &Client, test_app: &crate::common::utils::TestApp, username_prefix: &str) -> String {
-    let username = format!("{}{}", username_prefix, Uuid::new_v4());
+    let uuid_str = Uuid::new_v4().to_string();
+    let short_uuid = uuid_str.split('-').next().unwrap_or("abcd1234");
+    let username = format!("{}{}", username_prefix, short_uuid);
     let password = "password123";
     let email = format!("{}@example.com", username);
 
