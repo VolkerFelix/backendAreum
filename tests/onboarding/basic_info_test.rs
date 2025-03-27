@@ -16,7 +16,7 @@ async fn submit_basic_info_returns_401_without_token() {
         "biological_sex": "male",
         "height_cm": 180.0,
         "weight_kg": 75.0,
-        "goals": ["improve_sleep", "reduce_stress"]
+        "goals": ["sleep_improvement", "stress_reduction"]
     });
 
     // Act - Try to submit basic info without authentication
@@ -45,7 +45,7 @@ async fn submit_basic_info_returns_200_with_valid_token() {
         "biological_sex": "male",
         "height_cm": 180.0,
         "weight_kg": 75.0,
-        "goals": ["improve_sleep", "reduce_stress"]
+        "goals": ["sleep_improvement", "stress_reduction"]
     });
 
     // Act - Submit basic info
@@ -84,5 +84,5 @@ async fn submit_basic_info_returns_200_with_valid_token() {
     assert_eq!(get_json["data"]["biological_sex"], "male", "Biological sex should match");
     assert_eq!(get_json["data"]["height_cm"], 180.0, "Height should match");
     assert_eq!(get_json["data"]["weight_kg"], 75.0, "Weight should match");
-    assert_eq!(get_json["data"]["goals"], json!(["improve_sleep", "reduce_stress"]), "Goals should match");
-} 
+    assert_eq!(get_json["data"]["goals"], json!(["sleep_improvement", "stress_reduction"]), "Goals should match");
+}
