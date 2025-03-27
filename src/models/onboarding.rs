@@ -9,8 +9,8 @@ pub struct BasicInfoRequest {
     pub display_name: Option<String>,
     pub date_of_birth: Option<String>, // Format: YYYY-MM-DD
     pub biological_sex: Option<String>, // 'male', 'female', 'other', 'prefer_not_to_say'
-    pub height_cm: Option<f64>,
-    pub weight_kg: Option<f64>,
+    pub height_cm: Option<f32>,
+    pub weight_kg: Option<f32>,
     pub goals: Vec<String>, // Array of goal type names
 }
 
@@ -61,8 +61,8 @@ pub struct UserProfile {
     pub display_name: Option<String>,
     pub date_of_birth: Option<NaiveDate>,
     pub biological_sex: Option<String>,
-    pub height_cm: Option<f64>,
-    pub weight_kg: Option<f64>,
+    pub height_cm: Option<f32>,
+    pub weight_kg: Option<f32>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }

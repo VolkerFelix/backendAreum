@@ -21,12 +21,12 @@
       {
         "ordinal": 3,
         "name": "height_cm",
-        "type_info": "Numeric"
+        "type_info": "Float4"
       },
       {
         "ordinal": 4,
         "name": "weight_kg",
-        "type_info": "Numeric"
+        "type_info": "Float4"
       }
     ],
     "parameters": {

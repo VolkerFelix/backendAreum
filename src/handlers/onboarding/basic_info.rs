@@ -1,5 +1,5 @@
 use actix_web::{web, HttpResponse};
-use chrono::Utc;
+use chrono::{NaiveDate, Utc};
 use sqlx::PgPool;
 use uuid::Uuid;
 use num_traits::cast::ToPrimitive;
@@ -33,6 +33,64 @@ pub async fn submit_basic_info(
             });
         }
     };
+    
+    // Update or insert user profile
+    let now = Utc::now();
+    
+    // Parse date of birth if provided
+    let date_of_birth = match &data.date_of_birth {
+        Some(dob_str) => match NaiveDate::parse_from_str(dob_str, "%Y-%m-%d") {
+            Ok(date) => Some(date),
+            Err(e) => {
+                tracing::error!("Invalid date format: {:?}", e);
+                return HttpResponse::BadRequest().json(ApiResponse {
+                    status: "error".to_string(),
+                    message: Some("Invalid date format. Expected YYYY-MM-DD.".to_string()),
+                    data: None::<()>,
+                });
+            }
+        },
+        None => None,
+    };
+
+    // Insert or update user profile
+    match sqlx::query!(
+        r#"
+        INSERT INTO user_profiles (
+            id, user_id, display_name, date_of_birth, biological_sex,
+            height_cm, weight_kg, created_at, updated_at
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8)
+        ON CONFLICT (user_id) DO UPDATE
+        SET
+            display_name = EXCLUDED.display_name,
+            date_of_birth = EXCLUDED.date_of_birth,
+            biological_sex = EXCLUDED.biological_sex,
+            height_cm = EXCLUDED.height_cm,
+            weight_kg = EXCLUDED.weight_kg,
+            updated_at = EXCLUDED.updated_at
+        "#,
+        Uuid::new_v4(),
+        user_id,
+        data.display_name,
+        date_of_birth,
+        data.biological_sex,
+        data.height_cm,
+        data.weight_kg,
+        now
+    )
+    .execute(pool.get_ref())
+    .await {
+        Ok(_) => (),
+        Err(e) => {
+            tracing::error!("Failed to update user profile: {:?}", e);
+            return HttpResponse::InternalServerError().json(ApiResponse {
+                status: "error".to_string(),
+                message: Some("Database error".to_string()),
+                data: None::<()>,
+            });
+        }
+    }
     // Clear existing goals for the user
     match sqlx::query!(
         r#"
