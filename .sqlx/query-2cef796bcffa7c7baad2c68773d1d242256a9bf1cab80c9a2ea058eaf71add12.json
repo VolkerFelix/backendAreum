@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO permissions_settings (\n            id, user_id, heart_rate_enabled, temperature_enabled,\n            spo2_enabled, accelerometer_enabled, notifications_enabled,\n            background_usage_enabled, created_at, updated_at\n        )\n        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $9)\n        ON CONFLICT (user_id) DO UPDATE\n        SET\n            heart_rate_enabled = EXCLUDED.heart_rate_enabled,\n            temperature_enabled = EXCLUDED.temperature_enabled,\n            spo2_enabled = EXCLUDED.spo2_enabled,\n            accelerometer_enabled = EXCLUDED.accelerometer_enabled,\n            notifications_enabled = EXCLUDED.notifications_enabled,\n            background_usage_enabled = EXCLUDED.background_usage_enabled,\n            updated_at = EXCLUDED.updated_at\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Bool",
+        "Bool",
+        "Bool",
+        "Bool",
+        "Bool",
+        "Bool",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2cef796bcffa7c7baad2c68773d1d242256a9bf1cab80c9a2ea058eaf71add12"
+}

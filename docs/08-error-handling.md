@@ -205,5 +205,5 @@ async function handleHealthDataUpload(data) {
 
 ---
 
-Previous: [Data Types](06-data-types.md)
-Next: [Best Practices](08-best-practices.md)
+Previous: [Data Types](07-data-types.md)
+Next: [Best Practices](09-best-practices.md)

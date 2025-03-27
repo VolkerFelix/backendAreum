@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO user_medical_conditions (\n                id, user_id, condition_id, diagnosed_at, notes, created_at, updated_at\n            )\n            VALUES ($1, $2, $3, NULL, NULL, $4, $4)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2d9f61a3ca3f9e329d3136fdb982b5a2f539317f2a13616965fa65c71a77fa2f"
+}

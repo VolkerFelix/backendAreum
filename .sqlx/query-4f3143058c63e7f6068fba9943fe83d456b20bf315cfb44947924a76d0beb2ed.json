@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO user_third_party_connections (\n                id, user_id, connection_type_id, access_token,\n                refresh_token, token_expires_at, connection_status,\n                last_sync_at, connection_data, created_at, updated_at\n            )\n            VALUES ($1, $2, $3, NULL, NULL, NULL, 'pending', NULL, $4, $5, $5)\n            ON CONFLICT (user_id, connection_type_id) DO UPDATE\n            SET\n                connection_status = 'pending',\n                connection_data = EXCLUDED.connection_data,\n                updated_at = EXCLUDED.updated_at\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Jsonb",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4f3143058c63e7f6068fba9943fe83d456b20bf315cfb44947924a76d0beb2ed"
+}

@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT gt.name\n        FROM user_goals ug\n        JOIN goal_types gt ON ug.goal_type_id = gt.id\n        WHERE ug.user_id = $1\n        ORDER BY ug.priority\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "265fff42b5319e001f8813b2433d9db66deee3577de476cf625287daa6df8c0e"
+}

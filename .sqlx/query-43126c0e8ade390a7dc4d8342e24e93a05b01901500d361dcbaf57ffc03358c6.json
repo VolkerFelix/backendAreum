@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO lifestyle_info (\n            id, user_id, activity_level, bedtime, wake_time,\n            is_smoker, alcohol_consumption, tracks_menstrual_cycle,\n            menstrual_cycle_data, created_at, updated_at\n        )\n        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $10)\n        ON CONFLICT (user_id) DO UPDATE\n        SET\n            activity_level = EXCLUDED.activity_level,\n            bedtime = EXCLUDED.bedtime,\n            wake_time = EXCLUDED.wake_time,\n            is_smoker = EXCLUDED.is_smoker,\n            alcohol_consumption = EXCLUDED.alcohol_consumption,\n            tracks_menstrual_cycle = EXCLUDED.tracks_menstrual_cycle,\n            menstrual_cycle_data = EXCLUDED.menstrual_cycle_data,\n            updated_at = EXCLUDED.updated_at\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Varchar",
+        "Time",
+        "Time",
+        "Bool",
+        "Varchar",
+        "Bool",
+        "Jsonb",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "43126c0e8ade390a7dc4d8342e24e93a05b01901500d361dcbaf57ffc03358c6"
+}

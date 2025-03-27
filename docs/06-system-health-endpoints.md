@@ -80,5 +80,5 @@ Demonstrates protected endpoint access and token validation.
 
 ---
 
-Previous: [Sleep Data Endpoints](04-sleep-data-endpoints.md)
-Next: [Data Types](06-data-types.md)
+Previous: [Sleep Data Endpoints](05-sleep-data-endpoints.md)
+Next: [Data Types](07-data-types.md)

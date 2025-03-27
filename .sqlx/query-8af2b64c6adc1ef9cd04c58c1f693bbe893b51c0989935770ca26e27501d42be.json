@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE onboarding_progress\n        SET \n            permissions_setup_completed = true,\n            current_step = CASE WHEN current_step = 'permissions_setup' THEN 'personalization' ELSE current_step END,\n            updated_at = $1\n        WHERE user_id = $2\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Timestamptz",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8af2b64c6adc1ef9cd04c58c1f693bbe893b51c0989935770ca26e27501d42be"
+}

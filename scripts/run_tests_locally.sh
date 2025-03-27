@@ -31,6 +31,11 @@ DB_USER=${POSTGRES__DATABASE__USER}
 DB_NAME="areum_db"
 DB_PASSWORD=${POSTGRES__DATABASE__PASSWORD}
 
+# Test configuration
+TEST_LOG=${TEST_LOG:-false}
+RUST_BACKTRACE=${RUST_BACKTRACE:-0}
+TEST_PATTERN=""
+
 # Explicitly set DATABASE_URL for SQLx
 export DATABASE_URL="postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME"
 
@@ -58,7 +63,22 @@ prepare_sqlx() {
 # Function to run tests
 run_tests() {
     echo -e "${YELLOW}Running tests...${NC}"
-    RUST_BACKTRACE=1 cargo test
+    local test_cmd="cargo test"
+    
+    # Add test pattern if specified
+    if [ -n "$TEST_PATTERN" ]; then
+        test_cmd="$test_cmd $TEST_PATTERN"
+    fi
+    
+    # Add environment variables if enabled
+    if [ "$TEST_LOG" = "true" ]; then
+        test_cmd="TEST_LOG=true $test_cmd"
+    fi
+    if [ "$RUST_BACKTRACE" = "1" ]; then
+        test_cmd="RUST_BACKTRACE=1 $test_cmd"
+    fi
+    
+    eval "$test_cmd"
 }
 
 # Main script execution
@@ -95,6 +115,9 @@ show_help() {
     echo "  -p, --port           PostgreSQL port (default: 5432)"
     echo "  -d, --database       Database name (default: areum_db)"
     echo "  --host               PostgreSQL host (default: localhost)"
+    echo "  --test-log           Enable test logging (default: false)"
+    echo "  --backtrace          Enable backtrace (default: false)"
+    echo "  --test <pattern>     Run specific test(s) matching pattern"
 }
 
 # Parse command line arguments
@@ -119,6 +142,18 @@ while [[ $# -gt 0 ]]; do
             ;;
         --host)
             DB_HOST="$2"
+            shift 2
+            ;;
+        --test-log)
+            TEST_LOG="true"
+            shift
+            ;;
+        --backtrace)
+            RUST_BACKTRACE="1"
+            shift
+            ;;
+        --test)
+            TEST_PATTERN="$2"
             shift 2
             ;;
         *)
