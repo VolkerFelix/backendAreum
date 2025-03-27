@@ -24,5 +24,4 @@
 ## Support
 
 - Documentation: [Project README](README.md)
-- Contact: support@areum.health
 - Report Issues: GitHub Issues
