@@ -1,5 +1,5 @@
 use actix_web::{web, HttpResponse};
-use chrono::Utc;
+use chrono::{NaiveTime, Utc};
 use sqlx::PgPool;
 use uuid::Uuid;
 use serde_json::json;
@@ -26,6 +26,59 @@ pub async fn submit_lifestyle_health(
         }
     };
 
+    // Create lifestyle info record first
+    let lifestyle_id = Uuid::new_v4();
+    let now = Utc::now();
+    
+    // Parse time strings to NaiveTime if provided
+    let bedtime = data.bedtime.as_deref()
+        .and_then(|t| NaiveTime::parse_from_str(t, "%H:%M").ok());
+    let wake_time = data.wake_time.as_deref()
+        .and_then(|t| NaiveTime::parse_from_str(t, "%H:%M").ok());
+    
+    let lifestyle_result = sqlx::query!(
+        r#"
+        INSERT INTO lifestyle_info (
+            id, user_id, activity_level, bedtime, wake_time,
+            is_smoker, alcohol_consumption, tracks_menstrual_cycle,
+            menstrual_cycle_data, created_at, updated_at
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $10)
+        ON CONFLICT (user_id) DO UPDATE
+        SET
+            activity_level = EXCLUDED.activity_level,
+            bedtime = EXCLUDED.bedtime,
+            wake_time = EXCLUDED.wake_time,
+            is_smoker = EXCLUDED.is_smoker,
+            alcohol_consumption = EXCLUDED.alcohol_consumption,
+            tracks_menstrual_cycle = EXCLUDED.tracks_menstrual_cycle,
+            menstrual_cycle_data = EXCLUDED.menstrual_cycle_data,
+            updated_at = EXCLUDED.updated_at
+        "#,
+        lifestyle_id,
+        user_id,
+        data.activity_level,
+        bedtime,
+        wake_time,
+        data.is_smoker,
+        data.alcohol_consumption,
+        data.tracks_menstrual_cycle,
+        data.menstrual_cycle_data,
+        now
+    )
+    .execute(pool.get_ref())
+    .await;
+
+    if let Err(e) = lifestyle_result {
+        tracing::error!("Failed to insert lifestyle info: {:?}", e);
+        return HttpResponse::InternalServerError().json(ApiResponse {
+            status: "error".to_string(),
+            message: Some("Failed to save lifestyle information".to_string()),
+            data: None::<()>,
+        });
+    }
+
+    // Clear existing medical conditions
     let result = sqlx::query!(
         r#"
         DELETE FROM user_medical_conditions
@@ -89,7 +142,7 @@ pub async fn submit_lifestyle_health(
             Uuid::new_v4(),
             user_id,
             condition.id,
-            Utc::now()
+            now
         )
         .execute(pool.get_ref())
         .await;
@@ -112,7 +165,7 @@ pub async fn submit_lifestyle_health(
             updated_at = $1
         WHERE user_id = $2
         "#,
-        Utc::now(),
+        now,
         user_id
     )
     .execute(pool.get_ref())

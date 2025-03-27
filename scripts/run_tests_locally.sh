@@ -58,7 +58,7 @@ prepare_sqlx() {
 # Function to run tests
 run_tests() {
     echo -e "${YELLOW}Running tests...${NC}"
-    TEST_LOG=true RUST_BACKTRACE=1 cargo test onboarding::basic_info_test::submit_basic_info_returns_200_with_valid_token
+    TEST_LOG=true RUST_BACKTRACE=1 cargo test onboarding::lifestyle_health_test::submit_lifestyle_health_returns_200_with_valid_token
 }
 
 # Main script execution
