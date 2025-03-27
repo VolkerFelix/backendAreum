@@ -1,4 +1,5 @@
 use actix_web::{web, HttpResponse};
+use chrono::Utc;
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -32,16 +33,22 @@ pub async fn submit_personalization(
         }
     };
 
+    let id = Uuid::new_v4();
+    let now = Utc::now();
+
+    // Insert personalization info into database
     // Insert personalization info into database
     let result = sqlx::query!(
         r#"
-        INSERT INTO personalization_info (user_id, stress_triggers, work_type, timezone)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO personalization_info (id, user_id, stress_triggers, work_type, timezone, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $6)
         "#,
+        id,
         user_id,
         data.stress_triggers.as_deref(),
         data.work_type,
-        data.timezone
+        data.timezone,
+        now
     )
     .execute(pool.get_ref())    
     .await;
