@@ -192,5 +192,5 @@ Areum Health provides comprehensive sleep tracking and analysis endpoints.
 
 ---
 
-Previous: [Health Data Endpoints](03-health-data-endpoints.md)
-Next: [System Health Endpoints](05-system-health-endpoints.md)
+Previous: [Health Data Endpoints](04-health-data-endpoints.md)
+Next: [System Health Endpoints](06-system-health-endpoints.md)

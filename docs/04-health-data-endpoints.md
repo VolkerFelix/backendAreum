@@ -191,5 +191,5 @@ All health data endpoints follow a similar structure:
 
 ---
 
-Previous: [Authentication](02-authentication.md)
-Next: [Sleep Data Endpoints](04-sleep-data-endpoints.md)
+Previous: [User Onboarding](03-user-onboarding.md)
+Next: [Sleep Data Endpoints](05-sleep-data-endpoints.md)
